@@ -1,0 +1,115 @@
+2026-07-20 20:27:21,032  INFO      orchestrator — ═══════════════════════════════════════════════════════
+2026-07-20 20:27:21,032  INFO      orchestrator —   Pharma Lead Pipeline  |  2026-07-20 14:57  (UTC)
+2026-07-20 20:27:21,032  INFO      orchestrator — ═══════════════════════════════════════════════════════
+2026-07-20 20:27:21,064  INFO      utils.db — SQLite deduplication table ready.
+2026-07-20 20:27:21,067  INFO      orchestrator — ── Step 1: Discovery ─────────────────────────────────────────
+2026-07-20 20:27:21,077  INFO      utils.db — SQLite deduplication table ready.
+2026-07-20 20:27:35,355  INFO      agents.discovery_agent — TenderTiger yielded 0 raw results
+2026-07-20 20:27:47,848  INFO      agents.discovery_agent — IndiaMart yielded 0 raw results
+2026-07-20 20:28:01,447  INFO      agents.discovery_agent — Google News yielded 280 raw results
+2026-07-20 20:28:01,636  INFO      agents.discovery_agent — Discovery complete: 10 new companies (from 280 raw results)
+2026-07-20 20:28:01,645  INFO      orchestrator — Discovered 10 new companies
+2026-07-20 20:28:01,645  INFO      orchestrator — ── Step 2: Enrich + Extract Contacts ─────────────────────
+2026-07-20 20:28:01,645  INFO      orchestrator — [1/10] Sun Pharma
+2026-07-20 20:28:01,645  INFO      orchestrator — Processing: Sun Pharma
+2026-07-20 20:28:01,645  INFO      agents.enrichment_agent — Enriching company: Sun Pharma
+2026-07-20 20:28:06,463  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=Sun+Pharma: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=Sun+Pharma
+2026-07-20 20:29:19,142  ERROR     agents.enrichment_agent — Enrichment LLM failed for Sun Pharma: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:29:19,285  INFO      agents.enrichment_agent — Enriched Sun Pharma: {'name': 'Sun Pharma', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:30:10,700  INFO      utils.db — Neo4j: saved Company 'Sun Pharma'
+2026-07-20 20:30:10,716  INFO      orchestrator — No website for Sun Pharma — skipping contact extraction
+2026-07-20 20:30:10,716  INFO      orchestrator — No contacts found for Sun Pharma
+2026-07-20 20:30:10,716  INFO      orchestrator — [2/10] India Pharma
+2026-07-20 20:30:10,716  INFO      orchestrator — Processing: India Pharma
+2026-07-20 20:30:10,795  INFO      agents.enrichment_agent — Enriching company: India Pharma
+2026-07-20 20:30:17,669  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=India+Pharma: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=India+Pharma
+2026-07-20 20:31:23,231  ERROR     agents.enrichment_agent — Enrichment LLM failed for India Pharma: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:31:23,311  INFO      agents.enrichment_agent — Enriched India Pharma: {'name': 'India Pharma', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:31:30,166  INFO      utils.db — Neo4j: saved Company 'India Pharma'
+2026-07-20 20:31:30,182  INFO      orchestrator — No website for India Pharma — skipping contact extraction
+2026-07-20 20:31:30,182  INFO      orchestrator — No contacts found for India Pharma
+2026-07-20 20:31:30,182  INFO      orchestrator — [3/10] Piyush Goyal Invites Global Pharma
+2026-07-20 20:31:30,182  INFO      orchestrator — Processing: Piyush Goyal Invites Global Pharma
+2026-07-20 20:31:30,292  INFO      agents.enrichment_agent — Enriching company: Piyush Goyal Invites Global Pharma
+2026-07-20 20:31:33,887  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=Piyush+Goyal+Invites+Global+Pharma: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=Piyush+Goyal+Invites+Global+Pharma
+2026-07-20 20:32:40,319  ERROR     agents.enrichment_agent — Enrichment LLM failed for Piyush Goyal Invites Global Pharma: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:32:40,384  INFO      agents.enrichment_agent — Enriched Piyush Goyal Invites Global Pharma: {'name': 'Piyush Goyal Invites Global Pharma', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:32:45,223  INFO      utils.db — Neo4j: saved Company 'Piyush Goyal Invites Global Pharma'
+2026-07-20 20:32:45,233  INFO      orchestrator — No website for Piyush Goyal Invites Global Pharma — skipping contact extraction
+2026-07-20 20:32:45,238  INFO      orchestrator — No contacts found for Piyush Goyal Invites Global Pharma
+2026-07-20 20:32:45,241  INFO      orchestrator — [4/10] How M Pharma
+2026-07-20 20:32:45,241  INFO      orchestrator — Processing: How M Pharma
+2026-07-20 20:32:45,356  INFO      agents.enrichment_agent — Enriching company: How M Pharma
+2026-07-20 20:32:55,241  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=How+M+Pharma: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=How+M+Pharma
+2026-07-20 20:34:06,852  ERROR     agents.enrichment_agent — Enrichment LLM failed for How M Pharma: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:34:06,918  INFO      agents.enrichment_agent — Enriched How M Pharma: {'name': 'How M Pharma', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:34:08,516  INFO      utils.db — Neo4j: saved Company 'How M Pharma'
+2026-07-20 20:34:08,520  INFO      orchestrator — No website for How M Pharma — skipping contact extraction
+2026-07-20 20:34:08,523  INFO      orchestrator — No contacts found for How M Pharma
+2026-07-20 20:34:08,524  INFO      orchestrator — [5/10] Trillion Pharma
+2026-07-20 20:34:08,524  INFO      orchestrator — Processing: Trillion Pharma
+2026-07-20 20:34:08,621  INFO      agents.enrichment_agent — Enriching company: Trillion Pharma
+2026-07-20 20:34:13,674  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=Trillion+Pharma: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=Trillion+Pharma
+2026-07-20 20:35:23,328  ERROR     agents.enrichment_agent — Enrichment LLM failed for Trillion Pharma: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:35:23,368  INFO      agents.enrichment_agent — Enriched Trillion Pharma: {'name': 'Trillion Pharma', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:35:24,715  INFO      utils.db — Neo4j: saved Company 'Trillion Pharma'
+2026-07-20 20:35:24,719  INFO      orchestrator — No website for Trillion Pharma — skipping contact extraction
+2026-07-20 20:35:24,720  INFO      orchestrator — No contacts found for Trillion Pharma
+2026-07-20 20:35:24,720  INFO      orchestrator — [6/10] Lakh Crore Pharma
+2026-07-20 20:35:24,720  INFO      orchestrator — Processing: Lakh Crore Pharma
+2026-07-20 20:35:24,798  INFO      agents.enrichment_agent — Enriching company: Lakh Crore Pharma
+2026-07-20 20:35:28,470  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=Lakh+Crore+Pharma: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=Lakh+Crore+Pharma
+2026-07-20 20:36:35,082  ERROR     agents.enrichment_agent — Enrichment LLM failed for Lakh Crore Pharma: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:36:35,117  INFO      agents.enrichment_agent — Enriched Lakh Crore Pharma: {'name': 'Lakh Crore Pharma', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:36:37,008  INFO      utils.db — Neo4j: saved Company 'Lakh Crore Pharma'
+2026-07-20 20:36:37,010  INFO      orchestrator — No website for Lakh Crore Pharma — skipping contact extraction
+2026-07-20 20:36:37,012  INFO      orchestrator — No contacts found for Lakh Crore Pharma
+2026-07-20 20:36:37,012  INFO      orchestrator — [7/10] The Companies Defining Global Healthcare
+2026-07-20 20:36:37,013  INFO      orchestrator — Processing: The Companies Defining Global Healthcare
+2026-07-20 20:36:37,117  INFO      agents.enrichment_agent — Enriching company: The Companies Defining Global Healthcare
+2026-07-20 20:36:42,282  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=The+Companies+Defining+Global+Healthcare: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=The+Companies+Defining+Global+Healthcare
+2026-07-20 20:37:54,531  ERROR     agents.enrichment_agent — Enrichment LLM failed for The Companies Defining Global Healthcare: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:37:54,628  INFO      agents.enrichment_agent — Enriched The Companies Defining Global Healthcare: {'name': 'The Companies Defining Global Healthcare', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:37:57,668  INFO      utils.db — Neo4j: saved Company 'The Companies Defining Global Healthcare'
+2026-07-20 20:37:57,670  INFO      orchestrator — No website for The Companies Defining Global Healthcare — skipping contact extraction
+2026-07-20 20:37:57,673  INFO      orchestrator — No contacts found for The Companies Defining Global Healthcare
+2026-07-20 20:37:57,676  INFO      orchestrator — [8/10] Rise Of Chinese Pharmaceutical
+2026-07-20 20:37:57,677  INFO      orchestrator — Processing: Rise Of Chinese Pharmaceutical
+2026-07-20 20:37:57,782  INFO      agents.enrichment_agent — Enriching company: Rise Of Chinese Pharmaceutical
+2026-07-20 20:38:02,523  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=Rise+Of+Chinese+Pharmaceutical: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=Rise+Of+Chinese+Pharmaceutical
+2026-07-20 20:39:06,974  ERROR     agents.enrichment_agent — Enrichment LLM failed for Rise Of Chinese Pharmaceutical: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:39:07,008  INFO      agents.enrichment_agent — Enriched Rise Of Chinese Pharmaceutical: {'name': 'Rise Of Chinese Pharmaceutical', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:39:08,276  INFO      utils.db — Neo4j: saved Company 'Rise Of Chinese Pharmaceutical'
+2026-07-20 20:39:08,280  INFO      orchestrator — No website for Rise Of Chinese Pharmaceutical — skipping contact extraction
+2026-07-20 20:39:08,280  INFO      orchestrator — No contacts found for Rise Of Chinese Pharmaceutical
+2026-07-20 20:39:08,280  INFO      orchestrator — [9/10] Registering A Pharmaceutical
+2026-07-20 20:39:08,280  INFO      orchestrator — Processing: Registering A Pharmaceutical
+2026-07-20 20:39:08,315  INFO      agents.enrichment_agent — Enriching company: Registering A Pharmaceutical
+2026-07-20 20:39:11,642  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=Registering+A+Pharmaceutical: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=Registering+A+Pharmaceutical
+2026-07-20 20:40:18,062  ERROR     agents.enrichment_agent — Enrichment LLM failed for Registering A Pharmaceutical: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:40:18,107  INFO      agents.enrichment_agent — Enriched Registering A Pharmaceutical: {'name': 'Registering A Pharmaceutical', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:40:20,086  INFO      utils.db — Neo4j: saved Company 'Registering A Pharmaceutical'
+2026-07-20 20:40:20,089  INFO      orchestrator — No website for Registering A Pharmaceutical — skipping contact extraction
+2026-07-20 20:40:20,089  INFO      orchestrator — No contacts found for Registering A Pharmaceutical
+2026-07-20 20:40:20,089  INFO      orchestrator — [10/10] Ai Takes India Pharma
+2026-07-20 20:40:20,089  INFO      orchestrator — Processing: Ai Takes India Pharma
+2026-07-20 20:40:20,176  INFO      agents.enrichment_agent — Enriching company: Ai Takes India Pharma
+2026-07-20 20:40:26,332  WARNING   agents.enrichment_agent — GET failed for https://www.indiamart.com/search.mp?ss=Ai+Takes+India+Pharma: 404 Client Error: Not Found for url: https://www.indiamart.com/search.mp?ss=Ai+Takes+India+Pharma
+2026-07-20 20:41:33,918  ERROR     agents.enrichment_agent — Enrichment LLM failed for Ai Takes India Pharma: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-07-20 20:41:33,946  INFO      agents.enrichment_agent — Enriched Ai Takes India Pharma: {'name': 'Ai Takes India Pharma', 'website': '', 'industry': '', 'location': '', 'size': '', 'description': '', 'linkedin': '', 'founded': ''}
+2026-07-20 20:41:35,862  INFO      utils.db — Neo4j: saved Company 'Ai Takes India Pharma'
+2026-07-20 20:41:35,866  INFO      orchestrator — No website for Ai Takes India Pharma — skipping contact extraction
+2026-07-20 20:41:35,866  INFO      orchestrator — No contacts found for Ai Takes India Pharma
+2026-07-20 20:41:35,866  INFO      orchestrator — ── Step 3: Export Excel ──────────────────────────────────
+2026-07-20 20:41:52,118  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: email)} {position: line: 11, column: 19, offset: 408} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-20 20:41:52,162  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: website)} {position: line: 8, column: 19, offset: 279} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-20 20:41:52,163  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownLabelWarning} {category: UNRECOGNIZED} {title: The provided label is not in the database.} {description: One of the labels in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing label name is: Person)} {position: line: 2, column: 22, offset: 22} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-20 20:41:52,166  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: industry)} {position: line: 6, column: 19, offset: 193} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-20 20:41:52,167  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownRelationshipTypeWarning} {category: UNRECOGNIZED} {title: The provided relationship type is not in the database.} {description: One of the relationship types in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing relationship type is: WORKS_AT)} {position: line: 2, column: 32, offset: 32} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-20 20:41:52,168  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: title)} {position: line: 10, column: 19, offset: 368} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-20 20:41:52,168  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: location)} {position: line: 7, column: 19, offset: 236} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-20 20:41:52,169  WARNING   utils.export — No leads found in the last 24 hours.
+2026-07-20 20:41:53,061  INFO      utils.export — Excel report saved: output\pharma_leads_20260720.xlsx (0 rows)
+2026-07-20 20:41:53,063  INFO      orchestrator — ═══════════════════════════════════════════════════════
+2026-07-20 20:41:53,063  INFO      orchestrator —   Pipeline complete — report: output\pharma_leads_20260720.xlsx
+2026-07-20 20:41:53,064  INFO      orchestrator — ═══════════════════════════════════════════════════════
