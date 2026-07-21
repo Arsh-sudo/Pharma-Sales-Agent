@@ -1,17 +1,24 @@
 """
-Discovery Agent
-═══════════════
-Scrapes TenderTiger, IndiaMart, and Google News for pharma companies.
-Deduplicates against SQLite and returns up to MAX_COMPANIES new entries.
+Discovery Agent — Fixed Version
+════════════════════════════════
+Sources:
+  1. Google News RSS  — with strict company-name filtering (not headlines)
+  2. TenderTiger      — scrapes tender listings
+  3. IndiaMart        — scrapes supplier listings
+  4. Fallback seed list — well-known Indian pharma companies with websites
 
-Exposed as a LangChain @tool so the Orchestrator agent can call it naturally.
+Key fixes vs v1:
+  - Google News regex tightened to reject headline-style extractions
+  - Minimum name quality checks (no verbs, no stopwords, min 2 words)
+  - Company blocklist for known false positives
+  - Seed list ensures the pipeline always has real companies with websites
 """
 import json
 import logging
 import random
 import re
 import time
-from typing import Any
+from urllib.parse import quote_plus
 
 import requests
 from bs4 import BeautifulSoup
@@ -29,16 +36,55 @@ from utils.db import init_sqlite, is_company_processed, mark_company_processed
 
 logger = logging.getLogger(__name__)
 
+# ── Blocklist: words/phrases that indicate a headline, not a company name ──────
+HEADLINE_WORDS = {
+    "how", "why", "what", "when", "where", "rise", "fall", "top", "best",
+    "global", "india", "invites", "defining", "registering", "takes", "ai",
+    "lakh", "crore", "trillion", "companies", "the companies", "new", "report",
+    "update", "analysis", "announces", "launches", "expands", "growth",
+}
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# Suffix patterns that indicate a real company name
+COMPANY_SUFFIXES = re.compile(
+    r"\b(Pharma(?:ceuticals?)?|Biotech|Biosciences?|Labs?|"
+    r"Life\s*Sciences?|Drugs?|Healthcare|Remedies|Formulations?|"
+    r"Meditech|Medicals?|Biologics?|Therapeutics?|Lifesciences?|"
+    r"Industries|Enterprises|Limited|Ltd\.?|Pvt\.?|Inc\.?)\b",
+    re.IGNORECASE,
+)
+
+# ── Seed list: real Indian pharma companies with verified websites ─────────────
+# Used when scraping yields few results. Each has a known website for
+# contact extraction to work on.
+SEED_COMPANIES = [
+    {"name": "Cipla Ltd",           "website": "https://www.cipla.com",         "source": "seed"},
+    {"name": "Dr Reddys Laboratories","website": "https://www.drreddys.com",    "source": "seed"},
+    {"name": "Lupin Pharmaceuticals", "website": "https://www.lupin.com",       "source": "seed"},
+    {"name": "Aurobindo Pharma",      "website": "https://www.aurobindo.com",   "source": "seed"},
+    {"name": "Cadila Healthcare",     "website": "https://www.zyduslife.com",   "source": "seed"},
+    {"name": "Torrent Pharmaceuticals","website": "https://www.torrentpharma.com","source": "seed"},
+    {"name": "Alkem Laboratories",    "website": "https://www.alkemlabs.com",   "source": "seed"},
+    {"name": "Mankind Pharma",        "website": "https://www.mankindpharma.com","source": "seed"},
+    {"name": "Glenmark Pharmaceuticals","website": "https://www.glenmarkpharma.com","source": "seed"},
+    {"name": "Ipca Laboratories",     "website": "https://www.ipca.com",        "source": "seed"},
+    {"name": "Abbott India",          "website": "https://www.abbott.co.in",    "source": "seed"},
+    {"name": "Pfizer India",          "website": "https://www.pfizerindia.com", "source": "seed"},
+    {"name": "Sanofi India",          "website": "https://www.sanofi.com",      "source": "seed"},
+    {"name": "Novartis India",        "website": "https://www.novartis.in",     "source": "seed"},
+    {"name": "Wockhardt Ltd",         "website": "https://www.wockhardt.com",   "source": "seed"},
+    {"name": "Strides Pharma",        "website": "https://www.strides.com",     "source": "seed"},
+    {"name": "Jubilant Pharmova",     "website": "https://www.jubilantpharmova.com","source": "seed"},
+    {"name": "Granules India",        "website": "https://www.granulesindia.com","source": "seed"},
+    {"name": "Suven Pharmaceuticals", "website": "https://www.suven.com",       "source": "seed"},
+    {"name": "Eris Lifesciences",     "website": "https://www.erislifesciences.com","source": "seed"},
+]
+
 
 def _sleep() -> None:
-    """Polite random delay between HTTP requests."""
     time.sleep(random.uniform(SCRAPE_DELAY_MIN, SCRAPE_DELAY_MAX))
 
 
 def _get(url: str) -> BeautifulSoup | None:
-    """GET a URL and return a BeautifulSoup object, or None on failure."""
     try:
         resp = requests.get(url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
@@ -49,140 +95,70 @@ def _get(url: str) -> BeautifulSoup | None:
 
 
 def _is_pharma(text: str) -> bool:
-    """Return True if any pharma keyword appears in text (case-insensitive)."""
     text_lower = text.lower()
     return any(kw.lower() in text_lower for kw in PHARMA_KEYWORDS)
 
 
 def _clean_name(raw: str) -> str:
-    return re.sub(r"\s+", " ", raw.strip()).title()
+    name = re.sub(r"\s+", " ", raw.strip()).title()
+    # Remove trailing punctuation
+    name = name.strip(".,;:-–—")
+    return name
 
 
-def _extract_domain(url: str) -> str:
-    """Try to extract bare domain from a URL."""
-    match = re.search(r"https?://(?:www\.)?([^/\s]+)", url)
-    return match.group(1) if match else ""
-
-
-# ── Source scrapers ───────────────────────────────────────────────────────────
-
-def _scrape_tendertiger() -> list[dict]:
+def _is_valid_company_name(name: str) -> bool:
     """
-    Scrape TenderTiger search results for pharmaceutical tenders.
-    Returns list of {'name': ..., 'website': ..., 'source': 'tendertiger'}.
+    Return True only if the string looks like a real company name:
+      - At least 2 words
+      - Contains a company-style suffix (Pharma, Ltd, Labs, etc.)
+      - Does not start with a headline word
+      - Not too long (headline sentences are long)
     """
-    results: list[dict] = []
-    search_terms = ["pharmaceutical", "medicine", "drug", "API formulation"]
+    if not name or len(name) < 6 or len(name) > 60:
+        return False
 
-    for term in search_terms:
-        url = f"https://www.tendertiger.net/tender/search-tenders.aspx?key={term.replace(' ', '+')}"
-        soup = _get(url)
-        if not soup:
-            continue
+    words = name.lower().split()
+    if len(words) < 2:
+        return False
 
-        # TenderTiger tender listing — adjust selectors if their HTML changes
-        # Primary: rows in the results table
-        for row in soup.select("table.tenderlist tr, div.tender-row, li.tender-item"):
-            name_el = (
-                row.select_one(".org-name, .company, td:nth-child(3)")
-            )
-            if not name_el:
-                continue
+    # Reject if starts with a known headline/non-company word
+    if words[0] in HEADLINE_WORDS:
+        return False
 
-            raw_name = name_el.get_text(strip=True)
-            if not raw_name or len(raw_name) < 4:
-                continue
+    # Reject if more than 5 words (likely a headline phrase)
+    if len(words) > 5:
+        return False
 
-            # Only keep pharma-relevant entries
-            row_text = row.get_text(" ", strip=True)
-            if not _is_pharma(row_text) and not _is_pharma(raw_name):
-                continue
+    # Must contain a recognisable company suffix
+    if not COMPANY_SUFFIXES.search(name):
+        return False
 
-            link_el = row.select_one("a[href]")
-            website = link_el["href"] if link_el else ""
-            if website.startswith("/"):
-                website = "https://www.tendertiger.net" + website
-
-            results.append({
-                "name":    _clean_name(raw_name),
-                "website": website,
-                "source":  "tendertiger",
-            })
-
-        _sleep()
-
-    logger.info("TenderTiger yielded %d raw results", len(results))
-    return results
+    return True
 
 
-def _scrape_indiamart() -> list[dict]:
-    """
-    Scrape IndiaMart supplier listings for pharmaceutical companies.
-    Returns list of {'name': ..., 'website': ..., 'source': 'indiamart'}.
-    """
-    results: list[dict] = []
-    categories = [
-        "pharmaceutical-drugs",
-        "pharmaceutical-machinery",
-        "active-pharmaceutical-ingredients",
-    ]
-
-    for cat in categories:
-        url = f"https://dir.indiamart.com/industry/{cat}.html"
-        soup = _get(url)
-        if not soup:
-            continue
-
-        # IndiaMart company cards
-        for card in soup.select(
-            "div.company-name, div.companyName, h2.name a, "
-            "div.listing-card .title, li.supplier-name"
-        ):
-            raw_name = card.get_text(strip=True)
-            if not raw_name or len(raw_name) < 4:
-                continue
-
-            website = ""
-            if card.name == "a" and card.get("href"):
-                website = card["href"]
-            elif card.find("a"):
-                website = card.find("a").get("href", "")
-
-            results.append({
-                "name":    _clean_name(raw_name),
-                "website": website,
-                "source":  "indiamart",
-            })
-
-        _sleep()
-
-    logger.info("IndiaMart yielded %d raw results", len(results))
-    return results
-
+# ── Source: Google News RSS ────────────────────────────────────────────────────
 
 def _scrape_google_news() -> list[dict]:
-    """
-    Pull pharma company names from Google News RSS.
-    Returns list of {'name': ..., 'website': '', 'source': 'news'}.
-    """
     results: list[dict] = []
     queries = [
-        "new pharmaceutical company India",
-        "pharma company expansion India",
-        "pharmaceutical manufacturer registered India",
+        "pharmaceutical company India new",
+        "pharma manufacturer India",
+        "drug company India IPO",
     ]
 
-    # Company name patterns in news headlines
+    # Match only proper company names — must end with a known suffix
     company_pattern = re.compile(
-        r"\b([A-Z][a-zA-Z&\s]{3,40}(?:Pharma|Pharmaceuticals?|Biotech|"
-        r"Biosciences?|Labs?|Life\s*Sciences?|Drugs?|Healthcare|Remedies|"
-        r"Formulations?))\b"
+        r"\b([A-Z][A-Za-z&\s\.]{2,35}"
+        r"(?:Pharma(?:ceuticals?)?|Biotech|Biosciences?|Labs?|"
+        r"Life\s*Sciences?|Drugs?|Healthcare|Remedies|Formulations?|"
+        r"Meditech|Medicals?|Biologics?|Therapeutics?|Limited|Ltd\.?))"
+        r"\b"
     )
 
     for q in queries:
         url = (
             "https://news.google.com/rss/search?q="
-            + q.replace(" ", "+")
+            + quote_plus(q)
             + "&hl=en-IN&gl=IN&ceid=IN:en"
         )
         soup = _get(url)
@@ -193,7 +169,8 @@ def _scrape_google_news() -> list[dict]:
             text = item.get_text(" ", strip=True)
             for match in company_pattern.finditer(text):
                 name = _clean_name(match.group(1))
-                results.append({"name": name, "website": "", "source": "news"})
+                if _is_valid_company_name(name):
+                    results.append({"name": name, "website": "", "source": "news"})
 
         _sleep()
 
@@ -201,32 +178,89 @@ def _scrape_google_news() -> list[dict]:
     return results
 
 
-# ── Deduplication + Normalisation ─────────────────────────────────────────────
+# ── Source: TenderTiger ────────────────────────────────────────────────────────
+
+def _scrape_tendertiger() -> list[dict]:
+    results: list[dict] = []
+    for term in ["pharmaceutical", "medicine"]:
+        url = f"https://www.tendertiger.net/search?q={term}"
+        soup = _get(url)
+        if not soup:
+            continue
+        for row in soup.select("table tr, .tender-item, .result-row"):
+            cells = row.find_all("td")
+            for cell in cells:
+                raw = cell.get_text(strip=True)
+                name = _clean_name(raw)
+                if _is_valid_company_name(name) and _is_pharma(name):
+                    link = cell.find("a", href=True)
+                    website = link["href"] if link else ""
+                    results.append({"name": name, "website": website, "source": "tendertiger"})
+        _sleep()
+    logger.info("TenderTiger yielded %d raw results", len(results))
+    return results
+
+
+# ── Source: IndiaMart ─────────────────────────────────────────────────────────
+
+def _scrape_indiamart() -> list[dict]:
+    results: list[dict] = []
+    url = "https://dir.indiamart.com/industry/pharmaceutical-drugs.html"
+    soup = _get(url)
+    if soup:
+        for card in soup.select("div.company-name, h2.name a, .listing-card .title"):
+            raw = card.get_text(strip=True)
+            name = _clean_name(raw)
+            if _is_valid_company_name(name):
+                link = card.find("a", href=True) if card.name != "a" else card
+                website = link["href"] if link and link.get("href") else ""
+                results.append({"name": name, "website": website, "source": "indiamart"})
+        _sleep()
+    logger.info("IndiaMart yielded %d raw results", len(results))
+    return results
+
+
+# ── Deduplication ─────────────────────────────────────────────────────────────
 
 def _deduplicate(raw: list[dict]) -> list[dict]:
-    """
-    1. Remove entries already in SQLite (previously processed).
-    2. Remove duplicates within this batch (by normalised name).
-    """
-    seen_names: set[str] = set()
+    seen: set[str] = set()
     clean: list[dict] = []
-
     for entry in raw:
         name = entry.get("name", "").strip()
         if not name:
             continue
-
         norm = name.lower()
-        if norm in seen_names:
+        if norm in seen or is_company_processed(name):
             continue
-        if is_company_processed(name):
-            logger.debug("Skipping already-processed: %s", name)
-            continue
-
-        seen_names.add(norm)
+        seen.add(norm)
         clean.append(entry)
-
     return clean
+
+
+# ── Fill with seeds if not enough scraped companies ───────────────────────────
+
+def _fill_with_seeds(companies: list[dict], target: int) -> list[dict]:
+    """
+    If scraping yielded fewer than target companies, top up from SEED_COMPANIES
+    (skipping any already processed).
+    """
+    if len(companies) >= target:
+        return companies
+
+    logger.info(
+        "Only %d scraped companies — filling remainder from seed list", len(companies)
+    )
+    for seed in SEED_COMPANIES:
+        if len(companies) >= target:
+            break
+        name = seed["name"]
+        norm = name.lower()
+        already = any(c["name"].lower() == norm for c in companies)
+        if already or is_company_processed(name):
+            continue
+        companies.append(seed)
+
+    return companies
 
 
 # ── LangChain Tool ────────────────────────────────────────────────────────────
@@ -234,14 +268,10 @@ def _deduplicate(raw: list[dict]) -> list[dict]:
 @tool
 def discover_pharma_companies(dummy_input: str = "") -> str:
     """
-    Scrape TenderTiger, IndiaMart, and Google News to discover new pharma
-    companies that have not been processed before.
-
-    Returns a JSON string — a list of dicts with keys:
-      name (str), website (str), source (str)
-    Up to MAX_COMPANIES entries.
-
-    Call this tool with no arguments (or an empty string).
+    Discover new pharma companies from public sources (TenderTiger, IndiaMart,
+    Google News) plus a seed list of verified Indian pharma companies.
+    Returns JSON list of {name, website, source}. Up to MAX_COMPANIES entries.
+    Call with no arguments.
     """
     init_sqlite()
 
@@ -250,16 +280,17 @@ def discover_pharma_companies(dummy_input: str = "") -> str:
     raw.extend(_scrape_indiamart())
     raw.extend(_scrape_google_news())
 
-    new_companies = _deduplicate(raw)[:MAX_COMPANIES]
+    new_companies = _deduplicate(raw)
 
-    # Mark all as processed immediately to prevent re-processing if pipeline
-    # is interrupted and re-run on the same day
+    # Always ensure we have real companies with websites
+    new_companies = _fill_with_seeds(new_companies, MAX_COMPANIES)
+    new_companies = new_companies[:MAX_COMPANIES]
+
     for company in new_companies:
         mark_company_processed(company["name"], company.get("website", ""))
 
     logger.info(
-        "Discovery complete: %d new companies (from %d raw results)",
+        "Discovery complete: %d new companies (from %d raw + seeds)",
         len(new_companies), len(raw),
     )
-
     return json.dumps(new_companies, ensure_ascii=False)

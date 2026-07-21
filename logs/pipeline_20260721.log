@@ -1,0 +1,705 @@
+2026-07-21 19:47:11,364  INFO      orchestrator — ═══════════════════════════════════════════════════════
+2026-07-21 19:47:11,364  INFO      orchestrator —   Pharma Lead Pipeline  |  2026-07-21 14:17  (UTC)
+2026-07-21 19:47:11,369  INFO      orchestrator — ═══════════════════════════════════════════════════════
+2026-07-21 19:47:11,384  INFO      utils.db — SQLite deduplication table ready.
+2026-07-21 19:47:11,385  INFO      orchestrator — ── Step 1: Discovery ─────────────────────────────────────────
+2026-07-21 19:47:11,391  INFO      utils.db — SQLite deduplication table ready.
+2026-07-21 19:47:21,314  INFO      agents.discovery_agent — TenderTiger yielded 0 raw results
+2026-07-21 19:47:24,299  INFO      agents.discovery_agent — IndiaMart yielded 0 raw results
+2026-07-21 19:47:38,493  INFO      agents.discovery_agent — Google News yielded 328 raw results
+2026-07-21 19:47:38,658  INFO      agents.discovery_agent — Discovery complete: 10 new companies (from 328 raw + seeds)
+2026-07-21 19:47:38,658  INFO      orchestrator — Discovered 10 new companies
+2026-07-21 19:47:38,658  INFO      orchestrator — ── Step 2: Enrich + Extract Contacts ─────────────────────
+2026-07-21 19:47:38,658  INFO      orchestrator — [1/10] Sun Pharma
+2026-07-21 19:47:38,658  INFO      orchestrator — Processing: Sun Pharma
+2026-07-21 19:47:38,658  INFO      agents.enrichment_agent — Enriching company: Sun Pharma
+2026-07-21 19:47:38,658  INFO      agents.enrichment_agent — Using static enrichment for Sun Pharma
+2026-07-21 19:47:42,836  ERROR     orchestrator — Failed processing Sun Pharma: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:47:42,836  INFO      orchestrator — [2/10] Piyush Goyal Invites Global Pharma
+2026-07-21 19:47:42,836  INFO      orchestrator — Processing: Piyush Goyal Invites Global Pharma
+2026-07-21 19:47:42,837  INFO      agents.enrichment_agent — Enriching company: Piyush Goyal Invites Global Pharma
+2026-07-21 19:47:42,837  INFO      agents.enrichment_agent — No text available for Piyush Goyal Invites Global Pharma — skipping LLM
+2026-07-21 19:47:42,837  INFO      agents.enrichment_agent — Enriched Piyush Goyal Invites Global Pharma: industry=Pharmaceutical location=India
+2026-07-21 19:47:46,904  ERROR     orchestrator — Failed processing Piyush Goyal Invites Global Pharma: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:47:46,904  INFO      orchestrator — [3/10] The Companies Defining Global Healthcare
+2026-07-21 19:47:46,904  INFO      orchestrator — Processing: The Companies Defining Global Healthcare
+2026-07-21 19:47:46,904  INFO      agents.enrichment_agent — Enriching company: The Companies Defining Global Healthcare
+2026-07-21 19:47:46,904  INFO      agents.enrichment_agent — No text available for The Companies Defining Global Healthcare — skipping LLM
+2026-07-21 19:47:46,904  INFO      agents.enrichment_agent — Enriched The Companies Defining Global Healthcare: industry=Pharmaceutical location=India
+2026-07-21 19:47:50,984  ERROR     orchestrator — Failed processing The Companies Defining Global Healthcare: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:47:50,984  INFO      orchestrator — [4/10] Substandard Drugs
+2026-07-21 19:47:50,984  INFO      orchestrator — Processing: Substandard Drugs
+2026-07-21 19:47:50,984  INFO      agents.enrichment_agent — Enriching company: Substandard Drugs
+2026-07-21 19:47:50,984  INFO      agents.enrichment_agent — No text available for Substandard Drugs — skipping LLM
+2026-07-21 19:47:50,984  INFO      agents.enrichment_agent — Enriched Substandard Drugs: industry=Pharmaceutical location=India
+2026-07-21 19:47:55,025  ERROR     orchestrator — Failed processing Substandard Drugs: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:47:55,025  INFO      orchestrator — [5/10] From Generics To Global Pharma
+2026-07-21 19:47:55,025  INFO      orchestrator — Processing: From Generics To Global Pharma
+2026-07-21 19:47:55,025  INFO      agents.enrichment_agent — Enriching company: From Generics To Global Pharma
+2026-07-21 19:47:55,025  INFO      agents.enrichment_agent — No text available for From Generics To Global Pharma — skipping LLM
+2026-07-21 19:47:55,025  INFO      agents.enrichment_agent — Enriched From Generics To Global Pharma: industry=Pharmaceutical location=India
+2026-07-21 19:47:59,091  ERROR     orchestrator — Failed processing From Generics To Global Pharma: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:47:59,091  INFO      orchestrator — [6/10] Express Pharma
+2026-07-21 19:47:59,091  INFO      orchestrator — Processing: Express Pharma
+2026-07-21 19:47:59,093  INFO      agents.enrichment_agent — Enriching company: Express Pharma
+2026-07-21 19:47:59,093  INFO      agents.enrichment_agent — No text available for Express Pharma — skipping LLM
+2026-07-21 19:47:59,093  INFO      agents.enrichment_agent — Enriched Express Pharma: industry=Pharmaceutical location=India
+2026-07-21 19:48:03,141  ERROR     orchestrator — Failed processing Express Pharma: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:48:03,141  INFO      orchestrator — [7/10] Indian Pharma
+2026-07-21 19:48:03,141  INFO      orchestrator — Processing: Indian Pharma
+2026-07-21 19:48:03,143  INFO      agents.enrichment_agent — Enriching company: Indian Pharma
+2026-07-21 19:48:03,143  INFO      agents.enrichment_agent — No text available for Indian Pharma — skipping LLM
+2026-07-21 19:48:03,143  INFO      agents.enrichment_agent — Enriched Indian Pharma: industry=Pharmaceutical location=India
+2026-07-21 19:48:07,174  ERROR     orchestrator — Failed processing Indian Pharma: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:48:07,176  INFO      orchestrator — [8/10] Generic Drug
+2026-07-21 19:48:07,176  INFO      orchestrator — Processing: Generic Drug
+2026-07-21 19:48:07,176  INFO      agents.enrichment_agent — Enriching company: Generic Drug
+2026-07-21 19:48:07,176  INFO      agents.enrichment_agent — No text available for Generic Drug — skipping LLM
+2026-07-21 19:48:07,176  INFO      agents.enrichment_agent — Enriched Generic Drug: industry=Pharmaceutical location=India
+2026-07-21 19:48:11,208  ERROR     orchestrator — Failed processing Generic Drug: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:48:11,210  INFO      orchestrator — [9/10] Indian Pharmaceutical
+2026-07-21 19:48:11,210  INFO      orchestrator — Processing: Indian Pharmaceutical
+2026-07-21 19:48:11,210  INFO      agents.enrichment_agent — Enriching company: Indian Pharmaceutical
+2026-07-21 19:48:11,210  INFO      agents.enrichment_agent — No text available for Indian Pharmaceutical — skipping LLM
+2026-07-21 19:48:11,210  INFO      agents.enrichment_agent — Enriched Indian Pharmaceutical: industry=Pharmaceutical location=India
+2026-07-21 19:48:15,258  ERROR     orchestrator — Failed processing Indian Pharmaceutical: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:48:15,258  INFO      orchestrator — [10/10] Tracks New Drug
+2026-07-21 19:48:15,258  INFO      orchestrator — Processing: Tracks New Drug
+2026-07-21 19:48:15,258  INFO      agents.enrichment_agent — Enriching company: Tracks New Drug
+2026-07-21 19:48:15,258  INFO      agents.enrichment_agent — No text available for Tracks New Drug — skipping LLM
+2026-07-21 19:48:15,258  INFO      agents.enrichment_agent — Enriched Tracks New Drug: industry=Pharmaceutical location=India
+2026-07-21 19:48:19,308  ERROR     orchestrator — Failed processing Tracks New Drug: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 528, in _connect
+    s.connect(resolved_address)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 690, in connect
+    s = BoltSocket._connect(resolved_address, tcp_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 546, in _connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 237, in run_pipeline
+    _process_company(company, neo4j)
+  File "C:\Users\arsha\Pharma-Sales-Agent\orchestrator.py", line 129, in _process_company
+    neo4j.save_company(enriched_data)
+  File "C:\Users\arsha\Pharma-Sales-Agent\utils\db.py", line 102, in save_company
+    session.run(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 302, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 130, in _connect
+    super()._connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 182, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 526, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 313, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 163, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 500, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 405, in open
+    BoltSocket.connect(
+  File "C:\Users\arsha\Pharma-Sales-Agent\venv\Lib\site-packages\neo4j\_async_compat\network\_bolt_socket.py", line 718, in connect
+    raise ServiceUnavailable(
+neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687 (resolved to ()):
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] No connection could be made because the target machine actively refused it)
+
+2026-07-21 19:48:19,308  INFO      orchestrator — ── Step 3: Export Excel ──────────────────────────────────
+2026-07-21 20:06:44,575  INFO      orchestrator — ═══════════════════════════════════════════════════════
+2026-07-21 20:06:44,575  INFO      orchestrator —   Pharma Lead Pipeline  |  2026-07-21 14:36  (UTC)
+2026-07-21 20:06:44,575  INFO      orchestrator — ═══════════════════════════════════════════════════════
+2026-07-21 20:06:44,575  INFO      utils.db — SQLite deduplication table ready.
+2026-07-21 20:06:44,575  INFO      orchestrator — ── Step 1: Discovery ─────────────────────────────────────────
+2026-07-21 20:06:44,592  INFO      utils.db — SQLite deduplication table ready.
+2026-07-21 20:06:53,829  INFO      agents.discovery_agent — TenderTiger yielded 0 raw results
+2026-07-21 20:06:59,107  INFO      agents.discovery_agent — IndiaMart yielded 0 raw results
+2026-07-21 20:07:11,863  INFO      agents.discovery_agent — Google News yielded 328 raw results
+2026-07-21 20:07:12,088  INFO      agents.discovery_agent — Discovery complete: 10 new companies (from 328 raw + seeds)
+2026-07-21 20:07:12,088  INFO      orchestrator — Discovered 10 new companies
+2026-07-21 20:07:12,088  INFO      orchestrator — ── Step 2: Enrich + Extract Contacts ─────────────────────
+2026-07-21 20:07:12,088  INFO      orchestrator — [1/10] Raay Neo Pharma
+2026-07-21 20:07:12,088  INFO      orchestrator — Processing: Raay Neo Pharma
+2026-07-21 20:07:12,092  INFO      agents.enrichment_agent — Enriching company: Raay Neo Pharma
+2026-07-21 20:07:12,093  INFO      agents.enrichment_agent — No text available for Raay Neo Pharma — skipping LLM
+2026-07-21 20:07:12,093  INFO      agents.enrichment_agent — Enriched Raay Neo Pharma: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,299  INFO      utils.db — Neo4j: saved Company 'Raay Neo Pharma'
+2026-07-21 20:07:21,299  INFO      orchestrator — No website for Raay Neo Pharma — skipping contact extraction
+2026-07-21 20:07:21,299  INFO      orchestrator — No contacts found for Raay Neo Pharma
+2026-07-21 20:07:21,299  INFO      orchestrator — [2/10] Centric Pharmaceutical
+2026-07-21 20:07:21,299  INFO      orchestrator — Processing: Centric Pharmaceutical
+2026-07-21 20:07:21,301  INFO      agents.enrichment_agent — Enriching company: Centric Pharmaceutical
+2026-07-21 20:07:21,301  INFO      agents.enrichment_agent — No text available for Centric Pharmaceutical — skipping LLM
+2026-07-21 20:07:21,301  INFO      agents.enrichment_agent — Enriched Centric Pharmaceutical: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,326  INFO      utils.db — Neo4j: saved Company 'Centric Pharmaceutical'
+2026-07-21 20:07:21,326  INFO      orchestrator — No website for Centric Pharmaceutical — skipping contact extraction
+2026-07-21 20:07:21,326  INFO      orchestrator — No contacts found for Centric Pharmaceutical
+2026-07-21 20:07:21,326  INFO      orchestrator — [3/10] Nikhil Kamath Brings Together Pharma
+2026-07-21 20:07:21,326  INFO      orchestrator — Processing: Nikhil Kamath Brings Together Pharma
+2026-07-21 20:07:21,326  INFO      agents.enrichment_agent — Enriching company: Nikhil Kamath Brings Together Pharma
+2026-07-21 20:07:21,326  INFO      agents.enrichment_agent — No text available for Nikhil Kamath Brings Together Pharma — skipping LLM
+2026-07-21 20:07:21,326  INFO      agents.enrichment_agent — Enriched Nikhil Kamath Brings Together Pharma: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,344  INFO      utils.db — Neo4j: saved Company 'Nikhil Kamath Brings Together Pharma'
+2026-07-21 20:07:21,344  INFO      orchestrator — No website for Nikhil Kamath Brings Together Pharma — skipping contact extraction
+2026-07-21 20:07:21,344  INFO      orchestrator — No contacts found for Nikhil Kamath Brings Together Pharma
+2026-07-21 20:07:21,358  INFO      orchestrator — [4/10] Govt Clears Indian Medicines Pharmaceutical
+2026-07-21 20:07:21,358  INFO      orchestrator — Processing: Govt Clears Indian Medicines Pharmaceutical
+2026-07-21 20:07:21,359  INFO      agents.enrichment_agent — Enriching company: Govt Clears Indian Medicines Pharmaceutical
+2026-07-21 20:07:21,359  INFO      agents.enrichment_agent — No text available for Govt Clears Indian Medicines Pharmaceutical — skipping LLM
+2026-07-21 20:07:21,359  INFO      agents.enrichment_agent — Enriched Govt Clears Indian Medicines Pharmaceutical: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,376  INFO      utils.db — Neo4j: saved Company 'Govt Clears Indian Medicines Pharmaceutical'
+2026-07-21 20:07:21,376  INFO      orchestrator — No website for Govt Clears Indian Medicines Pharmaceutical — skipping contact extraction
+2026-07-21 20:07:21,376  INFO      orchestrator — No contacts found for Govt Clears Indian Medicines Pharmaceutical
+2026-07-21 20:07:21,376  INFO      orchestrator — [5/10] Skymap Pharma
+2026-07-21 20:07:21,376  INFO      orchestrator — Processing: Skymap Pharma
+2026-07-21 20:07:21,376  INFO      agents.enrichment_agent — Enriching company: Skymap Pharma
+2026-07-21 20:07:21,376  INFO      agents.enrichment_agent — No text available for Skymap Pharma — skipping LLM
+2026-07-21 20:07:21,376  INFO      agents.enrichment_agent — Enriched Skymap Pharma: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,409  INFO      utils.db — Neo4j: saved Company 'Skymap Pharma'
+2026-07-21 20:07:21,409  INFO      orchestrator — No website for Skymap Pharma — skipping contact extraction
+2026-07-21 20:07:21,409  INFO      orchestrator — No contacts found for Skymap Pharma
+2026-07-21 20:07:21,409  INFO      orchestrator — [6/10] Which India Pharma
+2026-07-21 20:07:21,409  INFO      orchestrator — Processing: Which India Pharma
+2026-07-21 20:07:21,409  INFO      agents.enrichment_agent — Enriching company: Which India Pharma
+2026-07-21 20:07:21,409  INFO      agents.enrichment_agent — No text available for Which India Pharma — skipping LLM
+2026-07-21 20:07:21,409  INFO      agents.enrichment_agent — Enriched Which India Pharma: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,428  INFO      utils.db — Neo4j: saved Company 'Which India Pharma'
+2026-07-21 20:07:21,428  INFO      orchestrator — No website for Which India Pharma — skipping contact extraction
+2026-07-21 20:07:21,428  INFO      orchestrator — No contacts found for Which India Pharma
+2026-07-21 20:07:21,428  INFO      orchestrator — [7/10] Aristo Pharmaceuticals
+2026-07-21 20:07:21,428  INFO      orchestrator — Processing: Aristo Pharmaceuticals
+2026-07-21 20:07:21,428  INFO      agents.enrichment_agent — Enriching company: Aristo Pharmaceuticals
+2026-07-21 20:07:21,428  INFO      agents.enrichment_agent — No text available for Aristo Pharmaceuticals — skipping LLM
+2026-07-21 20:07:21,428  INFO      agents.enrichment_agent — Enriched Aristo Pharmaceuticals: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,445  INFO      utils.db — Neo4j: saved Company 'Aristo Pharmaceuticals'
+2026-07-21 20:07:21,445  INFO      orchestrator — No website for Aristo Pharmaceuticals — skipping contact extraction
+2026-07-21 20:07:21,445  INFO      orchestrator — No contacts found for Aristo Pharmaceuticals
+2026-07-21 20:07:21,445  INFO      orchestrator — [8/10] Three Pharma
+2026-07-21 20:07:21,445  INFO      orchestrator — Processing: Three Pharma
+2026-07-21 20:07:21,445  INFO      agents.enrichment_agent — Enriching company: Three Pharma
+2026-07-21 20:07:21,445  INFO      agents.enrichment_agent — No text available for Three Pharma — skipping LLM
+2026-07-21 20:07:21,445  INFO      agents.enrichment_agent — Enriched Three Pharma: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,462  INFO      utils.db — Neo4j: saved Company 'Three Pharma'
+2026-07-21 20:07:21,462  INFO      orchestrator — No website for Three Pharma — skipping contact extraction
+2026-07-21 20:07:21,462  INFO      orchestrator — No contacts found for Three Pharma
+2026-07-21 20:07:21,462  INFO      orchestrator — [9/10] Orchid Pharma
+2026-07-21 20:07:21,462  INFO      orchestrator — Processing: Orchid Pharma
+2026-07-21 20:07:21,462  INFO      agents.enrichment_agent — Enriching company: Orchid Pharma
+2026-07-21 20:07:21,462  INFO      agents.enrichment_agent — No text available for Orchid Pharma — skipping LLM
+2026-07-21 20:07:21,462  INFO      agents.enrichment_agent — Enriched Orchid Pharma: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,491  INFO      utils.db — Neo4j: saved Company 'Orchid Pharma'
+2026-07-21 20:07:21,491  INFO      orchestrator — No website for Orchid Pharma — skipping contact extraction
+2026-07-21 20:07:21,493  INFO      orchestrator — No contacts found for Orchid Pharma
+2026-07-21 20:07:21,493  INFO      orchestrator — [10/10] European Pharmaceutical
+2026-07-21 20:07:21,493  INFO      orchestrator — Processing: European Pharmaceutical
+2026-07-21 20:07:21,493  INFO      agents.enrichment_agent — Enriching company: European Pharmaceutical
+2026-07-21 20:07:21,493  INFO      agents.enrichment_agent — No text available for European Pharmaceutical — skipping LLM
+2026-07-21 20:07:21,493  INFO      agents.enrichment_agent — Enriched European Pharmaceutical: industry=Pharmaceutical location=India
+2026-07-21 20:07:21,509  INFO      utils.db — Neo4j: saved Company 'European Pharmaceutical'
+2026-07-21 20:07:21,509  INFO      orchestrator — No website for European Pharmaceutical — skipping contact extraction
+2026-07-21 20:07:21,509  INFO      orchestrator — No contacts found for European Pharmaceutical
+2026-07-21 20:07:21,509  INFO      orchestrator — ── Step 3: Export Excel ──────────────────────────────────
+2026-07-21 20:07:25,326  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: email)} {position: line: 11, column: 19, offset: 408} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-21 20:07:25,326  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: website)} {position: line: 8, column: 19, offset: 279} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-21 20:07:25,326  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownLabelWarning} {category: UNRECOGNIZED} {title: The provided label is not in the database.} {description: One of the labels in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing label name is: Person)} {position: line: 2, column: 22, offset: 22} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-21 20:07:25,326  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownRelationshipTypeWarning} {category: UNRECOGNIZED} {title: The provided relationship type is not in the database.} {description: One of the relationship types in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing relationship type is: WORKS_AT)} {position: line: 2, column: 32, offset: 32} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-21 20:07:25,326  WARNING   neo4j.notifications — Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: title)} {position: line: 10, column: 19, offset: 368} for query: '\n            MATCH (p:Person)-[:WORKS_AT]->(c:Company)\n            WHERE 1=1 AND c.updated_at >= datetime($since)\n            RETURN\n                c.name        AS company,\n                c.industry    AS industry,\n                c.location    AS location,\n                c.website     AS website,\n                p.name        AS contact_name,\n                p.title       AS title,\n                p.email       AS email\n            ORDER BY c.name, p.name\n        '
+2026-07-21 20:07:25,326  WARNING   utils.export — No leads found in the last 24 hours.
+2026-07-21 20:07:25,425  INFO      utils.export — Excel report saved: output\pharma_leads_20260721.xlsx (0 rows)
+2026-07-21 20:07:25,425  INFO      orchestrator — ═══════════════════════════════════════════════════════
+2026-07-21 20:07:25,425  INFO      orchestrator —   Pipeline complete — report: output\pharma_leads_20260721.xlsx
+2026-07-21 20:07:25,426  INFO      orchestrator — ═══════════════════════════════════════════════════════
