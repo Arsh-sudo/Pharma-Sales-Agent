@@ -1,175 +1,62 @@
+
 # =============================================================================
-# Pharma Lead Pipeline - Windows Setup
-# Run:
-# Set-ExecutionPolicy Bypass -Scope Process
-# .\setup.ps1
+# Pharma Lead Discovery Pipeline - Windows PowerShell Setup
+# =============================================================================
+# Run this in PowerShell as Administrator
 # =============================================================================
 
-$ErrorActionPreference = "Stop"
+Write-Host "======================================================================" -ForegroundColor Cyan
+Write-Host "     PHARMA LEAD DISCOVERY PIPELINE - WINDOWS SETUP                 " -ForegroundColor Cyan
+Write-Host "======================================================================" -ForegroundColor Cyan
+Write-Host ""
 
-function Info($msg)  { Write-Host "[INFO]  $msg" -ForegroundColor Green }
-function Warn($msg)  { Write-Host "[WARN]  $msg" -ForegroundColor Yellow }
-function ErrorExit($msg) {
-    Write-Host "[ERROR] $msg" -ForegroundColor Red
-    exit 1
+$ProjectDir = "$env:USERPROFILE\pharma-leads-pipeline"
+New-Item -ItemType Directory -Force -Path $ProjectDir | Out-Null
+Set-Location $ProjectDir
+
+Write-Host "[1/6] Installing Python 3.10..." -ForegroundColor Green
+if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+    winget install Python.Python.3.10 --accept-source-agreements --accept-package-agreements
 }
 
-Write-Host "`n=== Checking Python ===`n"
-
-# -----------------------------------------------------------------------------
-# Python
-# -----------------------------------------------------------------------------
-
-$python = Get-Command python -ErrorAction SilentlyContinue
-
-if (!$python) {
-    ErrorExit "Python not found. Install Python 3.10+ from https://python.org and check 'Add Python to PATH'."
-}
-
-Info "Using $(& python --version)"
-
-# -----------------------------------------------------------------------------
-# Virtual Environment
-# -----------------------------------------------------------------------------
-
-Write-Host "`n=== Virtual Environment ===`n"
-
-if (!(Test-Path ".\venv")) {
-    Info "Creating virtual environment..."
-    python -m venv venv
-}
-else {
-    Info "Virtual environment already exists."
-}
-
-& ".\venv\Scripts\Activate.ps1"
-
-Info "Virtual environment activated."
-
+Write-Host ""
+Write-Host "[2/6] Creating virtual environment..." -ForegroundColor Green
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip setuptools wheel
 
-# -----------------------------------------------------------------------------
-# Python Packages
-# -----------------------------------------------------------------------------
+Write-Host ""
+Write-Host "[3/6] Installing Python packages..." -ForegroundColor Green
+pip install langchain==0.2.0 langchain-community==0.2.0 langchain-ollama==0.1.0 `
+    beautifulsoup4==4.12.3 requests==2.31.0 playwright==1.44.0 neo4j==5.20.0 `
+    pandas==2.2.2 openpyxl==3.1.2 python-dotenv==1.0.1 lxml==5.2.2 `
+    fake-useragent==1.5.1 tenacity==8.3.0
 
-Write-Host "`n=== Installing Python Packages ===`n"
-
-pip install `
-langchain==0.2.16 `
-langchain-community==0.2.16 `
-langchain-core==0.2.38 `
-beautifulsoup4==4.12.3 `
-requests==2.32.3 `
-playwright==1.47.0 `
-neo4j==5.24.0 `
-pandas==2.2.3 `
-openpyxl==3.1.5 `
-python-dotenv==1.0.1 `
-lxml==5.3.0 `
-httpx==0.27.2
-
-Info "Installing Playwright browser..."
+Write-Host ""
+Write-Host "[4/6] Installing Playwright browsers..." -ForegroundColor Green
 playwright install chromium
 
-# -----------------------------------------------------------------------------
-# Ollama
-# -----------------------------------------------------------------------------
-
-Write-Host "`n=== Ollama ===`n"
-
-$ollama = Get-Command ollama -ErrorAction SilentlyContinue
-
-if (!$ollama) {
-
-    Warn "Ollama not installed."
-    Warn "Download from:"
-    Write-Host "https://ollama.com/download/windows"
-
-    Read-Host "Install Ollama then press ENTER"
-
+Write-Host ""
+Write-Host "[5/6] Checking Ollama..." -ForegroundColor Green
+$OllamaPath = "$env:LOCALAPPDATA\Programs\Ollama\ollama.exe"
+if (-not (Test-Path $OllamaPath)) {
+    Write-Host "    Please download Ollama from https://ollama.com/download/windows" -ForegroundColor Yellow
+    Write-Host "    Then run: ollama pull mistral" -ForegroundColor Yellow
+} else {
+    Write-Host "    Ollama found. Pulling Mistral..." -ForegroundColor Green
+    & $OllamaPath pull mistral
 }
 
-Info "Pulling Mistral model..."
-ollama pull mistral
-
-# -----------------------------------------------------------------------------
-# Neo4j
-# -----------------------------------------------------------------------------
-
-Write-Host "`n=== Neo4j ===`n"
-
-Warn "Install Neo4j Desktop:"
-Write-Host "https://neo4j.com/download/"
-
-Warn "Create a local database."
-Warn "Remember your password."
-
-# -----------------------------------------------------------------------------
-# .env
-# -----------------------------------------------------------------------------
-
-Write-Host "`n=== Creating .env ===`n"
-
-if (!(Test-Path ".env")) {
-
-@"
-# Neo4j
-NEO4J_URI=bolt://localhost:7687
-NEO4J_USER=neo4j
-NEO4J_PASSWORD=your_password_here
-
-# Ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=mistral
-
-# Pipeline
-MAX_COMPANIES_PER_RUN=10
-OUTPUT_DIR=./output
-LOG_LEVEL=INFO
-
-# Email
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your@gmail.com
-SMTP_PASSWORD=your_app_password
-REPORT_RECIPIENT=recipient@example.com
-"@ | Out-File ".env" -Encoding utf8
-
-Info ".env created."
-
-}
-else {
-
-Info ".env already exists."
-
-}
-
-# -----------------------------------------------------------------------------
-# Output Folder
-# -----------------------------------------------------------------------------
-
-if (!(Test-Path ".\output")) {
-    New-Item -ItemType Directory output | Out-Null
-}
-
-# -----------------------------------------------------------------------------
-# Summary
-# -----------------------------------------------------------------------------
+Write-Host ""
+Write-Host "[6/6] Checking Neo4j..." -ForegroundColor Green
+Write-Host "    Please download Neo4j Desktop from https://neo4j.com/download/" -ForegroundColor Yellow
+Write-Host "    Create a local DB with password: pharma-leads-2024" -ForegroundColor Yellow
 
 Write-Host ""
-Write-Host "===================================" -ForegroundColor Cyan
-Write-Host "Setup Complete!" -ForegroundColor Green
-Write-Host "===================================" -ForegroundColor Cyan
-Write-Host ""
-
-Write-Host "Python      : $(& python --version)"
-Write-Host "Venv        : .\venv"
-Write-Host "Neo4j       : http://localhost:7474"
-Write-Host "Ollama      : Mistral Installed"
-
-Write-Host ""
-Write-Host "Activate environment using:"
-Write-Host ".\venv\Scripts\Activate.ps1"
-Write-Host ""
-Write-Host "Then run:"
-Write-Host "python orchestrator.py"
+Write-Host "======================================================================" -ForegroundColor Cyan
+Write-Host "                    SETUP COMPLETE!                                   " -ForegroundColor Cyan
+Write-Host "======================================================================" -ForegroundColor Cyan
+Write-Host "  Project:  $ProjectDir" -ForegroundColor White
+Write-Host "  Next:    .\venv\Scripts\Activate.ps1" -ForegroundColor White
+Write-Host "           python agents\orchestrator.py" -ForegroundColor White
+Write-Host "======================================================================" -ForegroundColor Cyan
