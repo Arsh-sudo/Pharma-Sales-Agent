@@ -1,105 +1,79 @@
-"""
-Orchestrator - Pharma Lead Discovery Pipeline
-"""
-
-import os
+"""Pharma Lead Discovery Pipeline — Direct Execution Mode."""
 import sys
-
+import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from database.neo4j_helpers import setup_schema, save_company, save_contact, close_driver
 from tools.discovery_agent import discover_pharma_companies
 from tools.contact_agent import extract_contacts
 from tools.enrichment_agent import enrich_company
 from tools.excel_exporter import export_to_excel
-from database.neo4j_helpers import save_company, save_contact, setup_schema, close_driver
 
-def persist_company(company, enrichment):
-    company_data = {
-        "name": company.get("name", ""),
-        "website": company.get("website", enrichment.get("website", "")),
-        "industry": enrichment.get("industry", "Pharmaceuticals"),
-        "location": enrichment.get("location", "India"),
-        "description": enrichment.get("description", "Leading pharmaceutical company"),
-        "company_size": enrichment.get("company_size", ""),
-        "specialties": enrichment.get("specialties", ["Pharmaceuticals", "APIs", "Formulations"]),
-        "founded_year": enrichment.get("founded_year", ""),
-        "source": company.get("source", "discovery_agent")
-    }
-    return save_company(company_data)
-
-def persist_contacts(contacts, company_name):
-    saved_count = 0
-    for contact in contacts:
-        if contact.get("name"):
-            if save_contact(contact, company_name):
-                saved_count += 1
-    return saved_count
 
 def run_pipeline():
+    """Run the full pipeline: Discover -> Enrich -> Extract Contacts -> Save -> Export."""
     print("=" * 70)
     print("  PHARMA LEAD DISCOVERY PIPELINE")
     print("=" * 70)
     print()
 
+    # Step 0: Setup database
     setup_schema()
 
-    print("[Step 1/5] Discovering NEW pharma companies from real sources...")
-    companies = discover_pharma_companies()
+    # Step 1: Discover companies
+    print("[Step 1/5] Discovering companies...")
+    companies = discover_pharma_companies.func()
 
-    companies_with_websites = [c for c in companies if c.get("website") and c["website"].startswith("http")]
-    companies_without_websites = [c for c in companies if not (c.get("website") and c["website"].startswith("http"))]
+    if not companies:
+        print("[!] No companies found. Exiting.")
+        close_driver()
+        return
 
-    print(f"\n[Discovery Summary]")
-    print(f"  Total companies found: {len(companies)}")
-    print(f"  With websites: {len(companies_with_websites)}")
-    print(f"  Without websites: {len(companies_without_websites)}")
+    print(f"Found {len(companies)} companies\n")
 
-    print(f"\n[Step 2-4] Processing {len(companies_with_websites)} companies with websites...")
-
-    for idx, company in enumerate(companies_with_websites, 1):
-        name = company.get("name", "")
+    # Step 2-4: Process each company
+    for idx, company in enumerate(companies, 1):
+        name = company.get("name", "Unknown")
         website = company.get("website", "")
 
-        print(f"\n[{idx}/{len(companies_with_websites)}] Processing: {name}")
+        print(f"[{idx}/{len(companies)}] Processing: {name}")
         print(f"  Website: {website}")
 
-        try:
-            print("  -> Enriching company details...")
-            enrichment = enrich_company(website)
-            persist_company(company, enrichment)
-
-            print("  -> Extracting contacts...")
-            contacts = extract_contacts(website, name)
-            saved = persist_contacts(contacts, name)
-            print(f"  -> Saved {saved} contacts")
-        except Exception as e:
-            print(f"  -> Error: {e}")
+        if not website:
+            print(f"  Skipping {name}: No valid website\n")
             continue
 
-    if companies_without_websites:
-        print(f"\n[Saving {len(companies_without_websites)} companies without websites...]")
-        for company in companies_without_websites:
-            save_company({
-                "name": company["name"],
-                "website": "",
-                "industry": "Pharmaceuticals",
-                "location": "India",
-                "description": "Pharmaceutical company - website not found",
-                "company_size": "",
-                "specialties": ["Pharmaceuticals"],
-                "founded_year": "",
-                "source": company.get("source", "unknown")
-            })
+        # Enrich
+        print("  -> Enriching...")
+        enriched = enrich_company.func(name, website)
+        enriched["discovered_date"] = __import__("datetime").datetime.now().isoformat()
+        save_company(enriched)
 
-    print("\n[Step 5/5] Generating Excel report...")
-    excel_path = export_to_excel()
+        # Extract contacts
+        print("  -> Extracting contacts...")
+        contacts = extract_contacts.func(name, website)
+
+        if contacts:
+            for contact in contacts:
+                save_contact(contact, name)
+            print(f"  -> Saved {len(contacts)} contacts\n")
+        else:
+            print("  -> No contacts found\n")
+
+    # Step 5: Export
+    print("[Step 5/5] Generating Excel report...")
+    report_path = export_to_excel.func()
+
     close_driver()
 
-    print("\n" + "=" * 70)
+    print()
+    print("=" * 70)
     print("  PIPELINE COMPLETE")
+    print(f"  Report: {report_path}")
     print("=" * 70)
-    print(f"  Report: {excel_path}")
-    print("=" * 70)
+
+    return report_path
+
 
 if __name__ == "__main__":
     run_pipeline()
