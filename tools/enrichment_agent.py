@@ -1,18 +1,10 @@
-
-# ============================================
-# 4. tools/enrichment_agent.py
-# ============================================
-enrichment_agent = r'''"""
-Enrichment Agent - Company Details Extraction Tool
-Scrapes a company's website to extract general business information
-(industry, location, description, size, etc.) using Ollama Mistral.
+"""
+Enrichment Agent - Extracts company business details using Ollama Mistral
 """
 
 import json
 import re
-from typing import Dict
 from playwright.sync_api import sync_playwright
-from langchain.tools import tool
 from langchain_ollama import OllamaLLM
 from langchain.prompts import PromptTemplate
 
@@ -46,7 +38,7 @@ If a field is not found, use null or empty string.
 Do not include any explanation or markdown formatting.
 """)
 
-def extract_page_text(page) -> str:
+def extract_page_text(page):
     try:
         return page.evaluate("""
             () => {
@@ -58,7 +50,7 @@ def extract_page_text(page) -> str:
     except:
         return ""
 
-def parse_enrichment_response(response: str) -> Dict:
+def parse_enrichment_response(response):
     try:
         json_match = re.search(r'\{.*?\}', response, re.DOTALL)
         if json_match:
@@ -76,15 +68,13 @@ def parse_enrichment_response(response: str) -> Dict:
             "website": ""
         }
 
-@tool
-def enrich_company(company_website: str) -> Dict:
+def enrich_company(company_website):
     """
-    Given a company's website URL, extract general business details
-    (industry, location, description, size, specialties) using Ollama Mistral.
-    Returns a dict with company enrichment data.
+    Given a company website URL, extract business details.
+    Returns a dict with enrichment data.
     """
     if not company_website or not company_website.startswith("http"):
-        print(f"[Enrichment Agent] Invalid website URL: {company_website}")
+        print(f"[Enrichment] Invalid website URL: {company_website}")
         return {
             "company_name": "",
             "industry": "Pharmaceuticals",
@@ -95,7 +85,7 @@ def enrich_company(company_website: str) -> Dict:
             "founded_year": "",
             "website": company_website
         }
-    print(f"[Enrichment Agent] Enriching company data from: {company_website}")
+    print(f"[Enrichment] Enriching: {company_website}")
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
@@ -112,12 +102,12 @@ def enrich_company(company_website: str) -> Dict:
             response = llm.invoke(prompt)
             enrichment_data = parse_enrichment_response(response)
             enrichment_data["website"] = company_website
-            print(f"[Enrichment Agent] Extracted data:")
+            print("[Enrichment] Extracted:")
             for key, value in enrichment_data.items():
                 print(f"  {key}: {value}")
             return enrichment_data
         except Exception as e:
-            print(f"[Enrichment Agent] Error: {e}")
+            print(f"[Enrichment] Error: {e}")
             return {
                 "company_name": "",
                 "industry": "Pharmaceuticals",
@@ -132,10 +122,5 @@ def enrich_company(company_website: str) -> Dict:
             browser.close()
 
 if __name__ == "__main__":
-    result = enrich_company.invoke({"company_website": "https://www.example-pharma.com"})
+    result = enrich_company("https://www.example-pharma.com")
     print(json.dumps(result, indent=2))
-'''
-
-with open(f"{output_dir}/tools/enrichment_agent.py", "w") as f:
-    f.write(enrichment_agent)
-print("enrichment_agent.py written")

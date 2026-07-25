@@ -1,8 +1,4 @@
-
-# ============================================
-# 8. n8n_workflow.json
-# ============================================
-n8n_workflow = r'''{
+{
   "name": "Pharma Leads Daily Pipeline",
   "nodes": [
     {
@@ -16,51 +12,63 @@ n8n_workflow = r'''{
           ]
         }
       },
-      "id": "cron-trigger",
+      "id": "cron-trigger-001",
       "name": "Daily at 7AM",
       "type": "n8n-nodes-base.cron",
       "typeVersion": 1,
-      "position": [250, 300],
+      "position": [
+        250,
+        300
+      ],
       "webhookId": "pharma-daily-trigger"
     },
     {
       "parameters": {
-        "command": "cd /home/$(whoami)/pharma-leads-pipeline && source venv/bin/activate && python agents/orchestrator.py",
+        "command": "cd C:\\Users\\arsha\\pharma-leads-pipeline && .\\venv\\Scripts\\Activate.ps1 && python agents\\orchestrator.py",
         "executeTimeout": 3600
       },
-      "id": "execute-python",
+      "id": "execute-python-001",
       "name": "Run Pipeline Script",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [450, 300]
+      "position": [
+        450,
+        300
+      ]
     },
     {
       "parameters": {
         "operation": "read",
-        "filePath": "=/home/{{$env.USER}}/pharma-leads-pipeline/exports/pharma_leads_{{$now.format('YYYYMMDD')}}.xlsx"
+        "filePath": "=C:\\Users\\arsha\\pharma-leads-pipeline\\exports\\pharma_leads_{{$now.format('YYYYMMDD')}}.xlsx"
       },
-      "id": "read-excel",
+      "id": "read-excel-001",
       "name": "Read Excel File",
       "type": "n8n-nodes-base.readBinaryFiles",
       "typeVersion": 1,
-      "position": [650, 300]
+      "position": [
+        650,
+        300
+      ]
     },
     {
       "parameters": {
         "resource": "message",
         "operation": "send",
         "to": "={{ $json.email }}",
-        "subject": "📊 Daily Pharma Leads Report - {{$now.format('YYYY-MM-DD')}}",
+        "subject": "Daily Pharma Leads Report - {{$now.format('YYYY-MM-DD')}}",
         "text": "Hello,\n\nYour daily pharmaceutical lead discovery report is ready.\n\nThis automated report contains:\n- Newly discovered pharma companies\n- Extracted contact information\n- Company enrichment details\n\nThe report was generated at {{$now.format('YYYY-MM-DD HH:mm:ss')}}.\n\nBest regards,\nPharma Leads Pipeline",
-        "html": "<html><body><h2>📊 Daily Pharma Leads Report</h2><p>Your daily pharmaceutical lead discovery report is ready.</p><p><strong>Generated:</strong> {{$now.format('YYYY-MM-DD HH:mm:ss')}}</p><p>This report contains newly discovered pharma companies with contact information and enrichment details.</p><br><p>Best regards,<br><em>Pharma Leads Pipeline</em></p></body></html>",
+        "html": "<html><body><h2>Daily Pharma Leads Report</h2><p>Your daily pharmaceutical lead discovery report is ready.</p><p><strong>Generated:</strong> {{$now.format('YYYY-MM-DD HH:mm:ss')}}</p><p>This report contains newly discovered pharma companies with contact information and enrichment details.</p><br><p>Best regards,<br><em>Pharma Leads Pipeline</em></p></body></html>",
         "attachments": "={{ $binary.data }}",
         "options": {}
       },
-      "id": "send-gmail",
+      "id": "send-gmail-001",
       "name": "Send Gmail Report",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2,
-      "position": [850, 300],
+      "position": [
+        850,
+        300
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "gmail-creds",
@@ -89,26 +97,32 @@ n8n_workflow = r'''{
           ]
         }
       },
-      "id": "if-exists",
+      "id": "if-exists-001",
       "name": "File Exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [650, 500]
+      "position": [
+        650,
+        500
+      ]
     },
     {
       "parameters": {
         "resource": "message",
         "operation": "send",
         "to": "={{ $json.email }}",
-        "subject": "⚠️ Pharma Pipeline Alert - {{$now.format('YYYY-MM-DD')}}",
+        "subject": "Pharma Pipeline Alert - {{$now.format('YYYY-MM-DD')}}",
         "text": "Hello,\n\nThe daily pharma lead pipeline ran but no Excel report was generated.\n\nThis could mean:\n- No new companies were discovered today\n- The pipeline encountered an error\n\nPlease check the pipeline logs for details.\n\nBest regards,\nPharma Leads Pipeline",
         "options": {}
       },
-      "id": "send-alert",
+      "id": "send-alert-001",
       "name": "Send Alert Email",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2,
-      "position": [850, 500],
+      "position": [
+        850,
+        500
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "gmail-creds",
@@ -120,11 +134,14 @@ n8n_workflow = r'''{
       "parameters": {
         "jsCode": "// Prepare recipient email from environment or static\nreturn [{\n  json: {\n    email: process.env.RECIPIENT_EMAIL || 'your-email@example.com'\n  }\n}];"
       },
-      "id": "set-recipient",
+      "id": "set-recipient-001",
       "name": "Set Recipient",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [450, 100]
+      "position": [
+        450,
+        100
+      ]
     }
   ],
   "connections": {
@@ -214,8 +231,4 @@ n8n_workflow = r'''{
       "name": "daily-automation"
     }
   ]
-}'''
-
-with open(f"{output_dir}/n8n_workflow.json", "w") as f:
-    f.write(n8n_workflow)
-print("n8n_workflow.json written")
+}

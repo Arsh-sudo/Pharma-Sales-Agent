@@ -1,14 +1,8 @@
-
-# ============================================
-# 5. database/neo4j_helpers.py
-# ============================================
-neo4j_helpers = r'''"""
+"""
 Neo4j Database Helper Functions
-Handles all database operations for the Pharma Lead Discovery Pipeline.
 """
 
 import os
-from datetime import datetime
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 
@@ -21,18 +15,15 @@ NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "pharma-leads-2024")
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 
 def setup_schema():
-    """Create constraints and indexes for optimal performance."""
     with driver.session() as session:
         session.run("CREATE CONSTRAINT company_name IF NOT EXISTS FOR (c:Company) REQUIRE c.name IS UNIQUE")
         session.run("CREATE CONSTRAINT person_name_company IF NOT EXISTS FOR (p:Person) REQUIRE (p.name, p.company) IS UNIQUE")
-        session.run("CREATE CONSTRAINT daily_export_date IF NOT EXISTS FOR (d:DailyExport) REQUIRE d.date IS UNIQUE")
         session.run("CREATE INDEX company_industry IF NOT EXISTS FOR (c:Company) ON (c.industry)")
         session.run("CREATE INDEX person_email IF NOT EXISTS FOR (p:Person) ON (p.email)")
         session.run("CREATE INDEX company_source IF NOT EXISTS FOR (c:Company) ON (c.source)")
     print("[Neo4j] Schema setup complete")
 
-def save_company(company_data: dict) -> bool:
-    """Save or update a Company node in Neo4j."""
+def save_company(company_data):
     query = """
     MERGE (c:Company {name: $name})
     SET c.website = COALESCE($website, c.website, ""),
@@ -58,14 +49,7 @@ def save_company(company_data: dict) -> bool:
         print(f"[Neo4j Error] save_company: {e}")
     return False
 
-def company_exists(company_name: str) -> bool:
-    query = "MATCH (c:Company {name: $name}) RETURN count(c) > 0 AS exists"
-    with driver.session() as session:
-        result = session.run(query, name=company_name)
-        return result.single()["exists"]
-
-def save_contact(contact_data: dict, company_name: str) -> bool:
-    """Save a Person node and link it to a Company."""
+def save_contact(contact_data, company_name):
     query = """
     MATCH (c:Company {name: $company_name})
     MERGE (p:Person {name: $name, company: $company_name})
@@ -94,7 +78,7 @@ def save_contact(contact_data: dict, company_name: str) -> bool:
         print(f"[Neo4j Error] save_contact: {e}")
     return False
 
-def get_all_leads() -> list:
+def get_all_leads():
     query = """
     MATCH (p:Person)-[:WORKS_AT]->(c:Company)
     RETURN c.name AS Company, c.website AS Website, c.industry AS Industry,
@@ -107,7 +91,7 @@ def get_all_leads() -> list:
         result = session.run(query)
         return [record.data() for record in result]
 
-def get_companies_without_contacts() -> list:
+def get_companies_without_contacts():
     query = """
     MATCH (c:Company)
     WHERE NOT (c)<-[:WORKS_AT]-(:Person)
@@ -128,7 +112,7 @@ def mark_export_date():
         result = session.run(query)
         return result.single()["export_date"]
 
-def get_pipeline_stats() -> dict:
+def get_pipeline_stats():
     queries = {
         "total_companies": "MATCH (c:Company) RETURN count(c) AS count",
         "total_contacts": "MATCH (p:Person) RETURN count(p) AS count",
@@ -148,9 +132,4 @@ def close_driver():
 
 if __name__ == "__main__":
     setup_schema()
-    print("Pipeline stats:", get_pipeline_stats())
-'''
-
-with open(f"{output_dir}/database/neo4j_helpers.py", "w") as f:
-    f.write(neo4j_helpers)
-print("neo4j_helpers.py written")
+    print("Stats:", get_pipeline_stats())

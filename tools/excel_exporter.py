@@ -1,16 +1,10 @@
-
-# ============================================
-# 6. tools/excel_exporter.py
-# ============================================
-excel_exporter = r'''"""
-Excel Export Tool - Daily Report Generator
-Queries Neo4j and generates a dated Excel file with all leads.
+"""
+Excel Export Tool - Generates daily report from Neo4j data
 """
 
 import os
 import pandas as pd
 from datetime import datetime
-from langchain.tools import tool
 from database.neo4j_helpers import get_all_leads, get_companies_without_contacts, mark_export_date
 
 EXPORT_DIR = os.getenv("EXPORT_DIR", "./exports")
@@ -18,19 +12,21 @@ EXPORT_DIR = os.getenv("EXPORT_DIR", "./exports")
 def ensure_export_dir():
     os.makedirs(EXPORT_DIR, exist_ok=True)
 
-@tool
-def export_to_excel() -> str:
+def export_to_excel():
     """
-    Query Neo4j for all companies and contacts, then generate
-    a dated Excel report file. Returns the file path.
+    Query Neo4j and generate dated Excel report.
+    Returns the file path.
     """
     ensure_export_dir()
     print("[Excel Exporter] Generating daily report...")
+
     leads_with_contacts = get_all_leads()
     companies_without_contacts = get_companies_without_contacts()
+
     date_str = datetime.now().strftime("%Y%m%d")
     filename = f"pharma_leads_{date_str}.xlsx"
     filepath = os.path.join(EXPORT_DIR, filename)
+
     with pd.ExcelWriter(filepath, engine="openpyxl") as writer:
         if leads_with_contacts:
             df_contacts = pd.DataFrame(leads_with_contacts)
@@ -57,6 +53,7 @@ def export_to_excel() -> str:
             pd.DataFrame({"Message": ["No contacts found yet."]}).to_excel(
                 writer, sheet_name="Leads with Contacts", index=False
             )
+
         if companies_without_contacts:
             df_no_contacts = pd.DataFrame(companies_without_contacts)
             df_no_contacts.to_excel(writer, sheet_name="Companies No Contacts", index=False)
@@ -64,6 +61,7 @@ def export_to_excel() -> str:
             pd.DataFrame({"Message": ["All companies have contacts."]}).to_excel(
                 writer, sheet_name="Companies No Contacts", index=False
             )
+
         from database.neo4j_helpers import get_pipeline_stats
         stats = get_pipeline_stats()
         summary_df = pd.DataFrame([
@@ -74,6 +72,7 @@ def export_to_excel() -> str:
             ["Export Date", datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
         ], columns=["Metric", "Value"])
         summary_df.to_excel(writer, sheet_name="Summary", index=False)
+
     mark_export_date()
     print(f"[Excel Exporter] Report saved: {filepath}")
     print(f"  - Companies with contacts: {len(leads_with_contacts)}")
@@ -81,10 +80,5 @@ def export_to_excel() -> str:
     return filepath
 
 if __name__ == "__main__":
-    filepath = export_to_excel.invoke({})
+    filepath = export_to_excel()
     print(f"Export complete: {filepath}")
-'''
-
-with open(f"{output_dir}/tools/excel_exporter.py", "w") as f:
-    f.write(excel_exporter)
-print("excel_exporter.py written")
