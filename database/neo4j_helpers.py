@@ -28,8 +28,8 @@ def save_company(company_data):
     MERGE (c:Company {name: $name})
     SET c.website = COALESCE($website, c.website, ""),
         c.industry = COALESCE($industry, c.industry, "Pharmaceuticals"),
-        c.location = COALESCE($location, c.location, ""),
-        c.description = COALESCE($description, c.description, ""),
+        c.location = COALESCE($location, c.location, "India"),
+        c.description = COALESCE($description, c.description, "Pharmaceutical company"),
         c.company_size = COALESCE($company_size, c.company_size, ""),
         c.specialties = COALESCE($specialties, c.specialties, []),
         c.founded_year = COALESCE($founded_year, c.founded_year, ""),

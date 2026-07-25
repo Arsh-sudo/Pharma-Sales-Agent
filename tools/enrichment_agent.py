@@ -1,5 +1,5 @@
 """
-Enrichment Agent - Extracts company business details using Ollama Mistral
+Enrichment Agent - Extracts company business details
 """
 
 import json
@@ -22,21 +22,21 @@ from the following webpage content.
 WEBPAGE CONTENT:
 {text_content}
 
-Extract and return ONLY a valid JSON object with these fields:
-{{
+Extract and return ONLY a valid JSON object:
+{
   "company_name": "Official company name",
-  "industry": "Primary industry (e.g., Pharmaceuticals, Biotechnology, Healthcare)",
-  "location": "City, Country or headquarters location (e.g., Mumbai, India)",
-  "description": "Brief 2-3 sentence company description including what they manufacture",
-  "company_size": "Approximate employee count or size category",
-  "specialties": ["List of key products, services, or specialties"],
-  "founded_year": "Year founded if mentioned",
-  "website": "Company website URL"
-}}
+  "industry": "Primary industry",
+  "location": "City, Country (e.g., Mumbai, India or Hyderabad, India)",
+  "description": "Brief 2-3 sentence description including products/services",
+  "company_size": "Employee count or size",
+  "specialties": ["Product 1", "Product 2"],
+  "founded_year": "Year",
+  "website": "URL"
+}
 
-If a field is not found, use your best guess based on the company type (Indian pharmaceutical company).
-For location, typical Indian pharma hubs are: Mumbai, Hyderabad, Ahmedabad, Bangalore, Pune, Chennai.
-Do not include any explanation or markdown formatting.
+If fields are missing, guess based on it being an Indian pharmaceutical company.
+Typical Indian pharma hubs: Mumbai, Hyderabad, Ahmedabad, Bangalore, Pune, Chennai, Vadodara.
+Do not include markdown or explanations.
 """)
 
 def extract_page_text(page):
@@ -59,29 +59,19 @@ def parse_enrichment_response(response):
         return json.loads(response)
     except:
         return {
-            "company_name": "",
-            "industry": "Pharmaceuticals",
-            "location": "India",
-            "description": "Leading pharmaceutical company",
-            "company_size": "",
+            "company_name": "", "industry": "Pharmaceuticals", "location": "India",
+            "description": "Leading pharmaceutical company", "company_size": "",
             "specialties": ["Pharmaceuticals", "APIs", "Formulations"],
-            "founded_year": "",
-            "website": ""
+            "founded_year": "", "website": ""
         }
 
 def enrich_company(company_website):
-    """Extract business details from company website."""
     if not company_website or not company_website.startswith("http"):
-        print(f"[Enrichment] Invalid website: {company_website}")
         return {
-            "company_name": "",
-            "industry": "Pharmaceuticals",
-            "location": "India",
-            "description": "Leading pharmaceutical company",
-            "company_size": "",
+            "company_name": "", "industry": "Pharmaceuticals", "location": "India",
+            "description": "Leading pharmaceutical company", "company_size": "",
             "specialties": ["Pharmaceuticals", "APIs", "Formulations"],
-            "founded_year": "",
-            "website": company_website
+            "founded_year": "", "website": company_website
         }
 
     print(f"[Enrichment] Enriching: {company_website}")
@@ -102,7 +92,6 @@ def enrich_company(company_website):
             enrichment_data = parse_enrichment_response(response)
             enrichment_data["website"] = company_website
 
-            # Ensure defaults for empty fields
             if not enrichment_data.get("location"):
                 enrichment_data["location"] = "India"
             if not enrichment_data.get("description"):
@@ -110,25 +99,19 @@ def enrich_company(company_website):
             if not enrichment_data.get("industry"):
                 enrichment_data["industry"] = "Pharmaceuticals"
 
-            print("[Enrichment] Extracted:")
-            for key, value in enrichment_data.items():
-                print(f"  {key}: {value}")
+            print("[Enrichment] Done")
             return enrichment_data
         except Exception as e:
             print(f"[Enrichment] Error: {e}")
             return {
-                "company_name": "",
-                "industry": "Pharmaceuticals",
-                "location": "India",
-                "description": "Leading pharmaceutical company",
-                "company_size": "",
+                "company_name": "", "industry": "Pharmaceuticals", "location": "India",
+                "description": "Leading pharmaceutical company", "company_size": "",
                 "specialties": ["Pharmaceuticals", "APIs", "Formulations"],
-                "founded_year": "",
-                "website": company_website
+                "founded_year": "", "website": company_website
             }
         finally:
             browser.close()
 
 if __name__ == "__main__":
-    result = enrich_company("https://www.sunpharma.com")
+    result = enrich_company("https://www.mankindpharma.com")
     print(json.dumps(result, indent=2))

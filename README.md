@@ -1,38 +1,75 @@
-# Pharma Lead Discovery Pipeline
+# Pharma Lead Discovery Pipeline - n8n Edition
 
-## Quick Start
+## What Changed
 
-1. Copy ALL files from this folder to `C:\Users\arsha\pharma-leads-pipeline\`
-2. Update `.env` with your settings (email, passwords)
-3. Double-click `run_pipeline.bat` to test
-4. Set up Windows Task Scheduler for daily runs
+### Real Discovery (Not Just Demo List)
+The pipeline now tries to find REAL companies from:
+1. **Pharma News RSS Feeds** - FiercePharma, PharmaTimes, etc.
+2. **Government Tender Portals** - eProcurement, BidAssist
+3. **Startup Databases** - ZaubaCorp, etc.
+4. **Verified Real Companies** - Only used as fallback if scraping finds < 3 companies:
+   - Mankind Pharma, Alkem Labs, Intas Pharma, Cadila, Wockhardt
+   - Laurus Labs, Divi's Labs, Granules India, Aurobindo, Biocon
 
-## Files
+### n8n Integration
+- Flask API server (`api_server.py`) runs locally
+- n8n calls the API via HTTP Request nodes
+- No Code node needed (avoids sandbox restrictions)
 
-| File | Purpose |
-|------|---------|
-| `agents/orchestrator.py` | Main pipeline runner |
-| `tools/discovery_agent.py` | Scrapes pharma companies |
-| `tools/contact_agent.py` | Extracts contacts via Playwright + Mistral |
-| `tools/enrichment_agent.py` | Extracts company details |
-| `tools/excel_exporter.py` | Generates Excel reports |
-| `database/neo4j_helpers.py` | Neo4j database operations |
-| `run_pipeline.bat` | Windows batch runner |
-| `send_email.py` | Optional: Email the report |
-| `.env` | Configuration |
+## Setup
 
-## Prerequisites
+### 1. Install Flask
+```powershell
+cd C:\Users\arsha\pharma-leads-pipeline
+.\venv\Scripts\Activate.ps1
+pip install flask
+```
 
-- Python 3.10+
-- Ollama with Mistral model
-- Neo4j Desktop (running on localhost:7687)
-- Playwright browsers installed
+### 2. Start API Server (Keep Running!)
+```powershell
+cd C:\Users\arsha\pharma-leads-pipeline
+.\venv\Scripts\python.exe api_server.py
+```
 
-## Task Scheduler Setup
+### 3. Test Pipeline
+```powershell
+cd C:\Users\arsha\pharma-leads-pipeline
+run_pipeline.bat
+```
 
-1. Open `taskschd.msc`
-2. Create Basic Task → Name: `Pharma Pipeline Daily`
-3. Trigger: Daily at 7:00 AM
-4. Action: Start a program
-5. Program: `C:\Users\arsha\pharma-leads-pipeline\run_pipeline.bat`
-6. Start in: `C:\Users\arsha\pharma-leads-pipeline`
+### 4. Import n8n Workflow
+1. Open http://localhost:5678
+2. Workflows -> Import from File -> Select `n8n_workflow.json`
+3. Update email addresses in Gmail nodes
+4. Configure Gmail OAuth2 credentials
+5. Activate workflow
+
+## How It Works
+
+```
+Daily 7AM (n8n Cron)
+    |
+    v
+HTTP Request -> POST http://localhost:5000/run-pipeline
+    |
+    v
+Flask API -> Runs Python Pipeline
+    |
+    v
+Discovery Agent -> Scrapes real sources OR uses verified fallback
+    |
+    v
+Enrichment + Contact Agents -> Process each company
+    |
+    v
+Neo4j -> Stores companies and contacts
+    |
+    v
+Excel Export -> Generates dated report
+    |
+    v
+HTTP Request -> GET report path
+    |
+    v
+Read Excel -> Send Gmail with attachment
+```

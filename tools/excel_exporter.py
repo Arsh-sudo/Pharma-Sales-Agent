@@ -1,5 +1,5 @@
 """
-Excel Export Tool - Generates daily report from Neo4j data
+Excel Export Tool - Generates daily report
 """
 
 import os
@@ -13,7 +13,6 @@ def ensure_export_dir():
     os.makedirs(EXPORT_DIR, exist_ok=True)
 
 def auto_resize_columns(worksheet):
-    """Auto-resize all columns in the worksheet."""
     for column in worksheet.columns:
         max_length = 0
         column_letter = column[0].column_letter
@@ -25,13 +24,12 @@ def auto_resize_columns(worksheet):
                         max_length = cell_length
             except:
                 pass
-        adjusted_width = min(max_length + 3, 60)
+        adjusted_width = min(max_length + 4, 70)
         worksheet.column_dimensions[column_letter].width = adjusted_width
 
 def export_to_excel():
-    """Query Neo4j and generate dated Excel report. Returns file path."""
     ensure_export_dir()
-    print("[Excel Exporter] Generating daily report...")
+    print("[Excel Exporter] Generating report...")
 
     leads_with_contacts = get_all_leads()
     companies_without_contacts = get_companies_without_contacts()
@@ -41,61 +39,38 @@ def export_to_excel():
     filepath = os.path.join(EXPORT_DIR, filename)
 
     with pd.ExcelWriter(filepath, engine="openpyxl") as writer:
-        # Sheet 1: Leads with Contacts
         if leads_with_contacts:
             df_contacts = pd.DataFrame(leads_with_contacts)
-
-            # Ensure all expected columns exist
-            expected_cols = ["Company", "Website", "Industry", "Location", 
-                           "Contact", "Title", "Email", "Department", 
-                           "Description", "DiscoveredDate"]
-
-            # Rename columns if they have different names
             col_mapping = {
-                "c.name": "Company",
-                "c.website": "Website", 
-                "c.industry": "Industry",
-                "c.location": "Location",
-                "p.name": "Contact",
-                "p.title": "Title",
-                "p.email": "Email",
-                "p.department": "Department",
-                "c.description": "Description",
-                "c.discovered_date": "DiscoveredDate"
+                "c.name": "Company", "c.website": "Website", "c.industry": "Industry",
+                "c.location": "Location", "p.name": "Contact", "p.title": "Title",
+                "p.email": "Email", "p.department": "Department",
+                "c.description": "Description", "c.discovered_date": "DiscoveredDate"
             }
             df_contacts = df_contacts.rename(columns=col_mapping)
-
-            # Reorder columns
+            expected_cols = ["Company", "Website", "Industry", "Location", "Contact",
+                           "Title", "Email", "Department", "Description", "DiscoveredDate"]
             available_cols = [c for c in expected_cols if c in df_contacts.columns]
             df_contacts = df_contacts[available_cols]
-
             df_contacts.to_excel(writer, sheet_name="Leads with Contacts", index=False)
             auto_resize_columns(writer.sheets["Leads with Contacts"])
         else:
-            pd.DataFrame({"Message": ["No contacts found yet."]}).to_excel(
-                writer, sheet_name="Leads with Contacts", index=False
-            )
+            pd.DataFrame({"Message": ["No contacts found."]}).to_excel(
+                writer, sheet_name="Leads with Contacts", index=False)
             auto_resize_columns(writer.sheets["Leads with Contacts"])
 
-        # Sheet 2: Companies without Contacts
         if companies_without_contacts:
             df_no_contacts = pd.DataFrame(companies_without_contacts)
             df_no_contacts = df_no_contacts.rename(columns={
-                "c.name": "Company",
-                "c.website": "Website",
-                "c.industry": "Industry",
-                "c.location": "Location",
-                "c.description": "Description"
+                "c.name": "Company", "c.website": "Website", "c.industry": "Industry",
+                "c.location": "Location", "c.description": "Description"
             })
             df_no_contacts.to_excel(writer, sheet_name="Companies No Contacts", index=False)
             auto_resize_columns(writer.sheets["Companies No Contacts"])
         else:
             pd.DataFrame({"Message": ["All companies have contacts."]}).to_excel(
-                writer, sheet_name="Companies No Contacts", index=False
-            )
-            auto_resize_columns(writer.sheets["Companies No Contacts"])
+                writer, sheet_name="Companies No Contacts", index=False)
 
-        # Sheet 3: Summary
         from database.neo4j_helpers import get_pipeline_stats
         stats = get_pipeline_stats()
         summary_df = pd.DataFrame([
@@ -109,9 +84,9 @@ def export_to_excel():
         auto_resize_columns(writer.sheets["Summary"])
 
     mark_export_date()
-    print(f"[Excel Exporter] Report saved: {filepath}")
-    print(f"  - Companies with contacts: {len(leads_with_contacts)}")
-    print(f"  - Companies without contacts: {len(companies_without_contacts)}")
+    print(f"[Excel Exporter] Saved: {filepath}")
+    print(f"  - With contacts: {len(leads_with_contacts)}")
+    print(f"  - Without contacts: {len(companies_without_contacts)}")
     return filepath
 
 if __name__ == "__main__":

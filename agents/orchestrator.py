@@ -11,7 +11,6 @@ from tools.discovery_agent import discover_pharma_companies
 from tools.contact_agent import extract_contacts
 from tools.enrichment_agent import enrich_company
 from tools.excel_exporter import export_to_excel
-from tools.demo_companies import get_demo_companies
 from database.neo4j_helpers import save_company, save_contact, setup_schema, close_driver
 
 def persist_company(company, enrichment):
@@ -19,10 +18,10 @@ def persist_company(company, enrichment):
         "name": company.get("name", ""),
         "website": company.get("website", enrichment.get("website", "")),
         "industry": enrichment.get("industry", "Pharmaceuticals"),
-        "location": enrichment.get("location", ""),
-        "description": enrichment.get("description", ""),
+        "location": enrichment.get("location", "India"),
+        "description": enrichment.get("description", "Leading pharmaceutical company"),
         "company_size": enrichment.get("company_size", ""),
-        "specialties": enrichment.get("specialties", []),
+        "specialties": enrichment.get("specialties", ["Pharmaceuticals", "APIs", "Formulations"]),
         "founded_year": enrichment.get("founded_year", ""),
         "source": company.get("source", "discovery_agent")
     }
@@ -44,46 +43,53 @@ def run_pipeline():
 
     setup_schema()
 
-    print("[Step 1/5] Discovering companies...")
+    print("[Step 1/5] Discovering NEW pharma companies from real sources...")
     companies = discover_pharma_companies()
 
     companies_with_websites = [c for c in companies if c.get("website") and c["website"].startswith("http")]
+    companies_without_websites = [c for c in companies if not (c.get("website") and c["website"].startswith("http"))]
 
-    if not companies_with_websites:
-        print("\n[!] No companies with valid websites found from scraping.")
-        print("[!] Using demo companies...")
-        companies = get_demo_companies(3)
-        print(f"[Demo] Loaded {len(companies)} companies:")
-        for c in companies:
-            print(f"  - {c['name']} | {c['website']}")
-    else:
-        companies = companies_with_websites
+    print(f"\n[Discovery Summary]")
+    print(f"  Total companies found: {len(companies)}")
+    print(f"  With websites: {len(companies_with_websites)}")
+    print(f"  Without websites: {len(companies_without_websites)}")
 
-    print(f"\n[Step 2-4] Processing {len(companies)} companies...")
+    print(f"\n[Step 2-4] Processing {len(companies_with_websites)} companies with websites...")
 
-    for idx, company in enumerate(companies, 1):
+    for idx, company in enumerate(companies_with_websites, 1):
         name = company.get("name", "")
         website = company.get("website", "")
 
-        if not website or not website.startswith("http"):
-            print(f"\nSkipping {name}: No valid website")
-            continue
-
-        print(f"\n[{idx}/{len(companies)}] Processing: {name}")
+        print(f"\n[{idx}/{len(companies_with_websites)}] Processing: {name}")
         print(f"  Website: {website}")
 
         try:
-            print("  -> Enriching...")
+            print("  -> Enriching company details...")
             enrichment = enrich_company(website)
             persist_company(company, enrichment)
 
             print("  -> Extracting contacts...")
-            contacts = extract_contacts(website, name)  # Pass company name!
+            contacts = extract_contacts(website, name)
             saved = persist_contacts(contacts, name)
             print(f"  -> Saved {saved} contacts")
         except Exception as e:
             print(f"  -> Error: {e}")
             continue
+
+    if companies_without_websites:
+        print(f"\n[Saving {len(companies_without_websites)} companies without websites...]")
+        for company in companies_without_websites:
+            save_company({
+                "name": company["name"],
+                "website": "",
+                "industry": "Pharmaceuticals",
+                "location": "India",
+                "description": "Pharmaceutical company - website not found",
+                "company_size": "",
+                "specialties": ["Pharmaceuticals"],
+                "founded_year": "",
+                "source": company.get("source", "unknown")
+            })
 
     print("\n[Step 5/5] Generating Excel report...")
     excel_path = export_to_excel()

@@ -12,25 +12,26 @@
           ]
         }
       },
-      "id": "cron-trigger-001",
+      "id": "cron-001",
       "name": "Daily at 7AM",
       "type": "n8n-nodes-base.cron",
       "typeVersion": 1,
       "position": [
         250,
         300
-      ],
-      "webhookId": "pharma-daily-trigger"
+      ]
     },
     {
       "parameters": {
-        "command": "cd C:\\Users\\arsha\\pharma-leads-pipeline && .\\venv\\Scripts\\Activate.ps1 && python agents\\orchestrator.py",
-        "executeTimeout": 3600
+        "method": "POST",
+        "url": "http://localhost:5000/run-pipeline",
+        "options": {},
+        "sendBody": false
       },
-      "id": "execute-python-001",
-      "name": "Run Pipeline Script",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
+      "id": "http-run-001",
+      "name": "Run Pipeline API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
       "position": [
         450,
         300
@@ -38,43 +39,18 @@
     },
     {
       "parameters": {
-        "operation": "read",
-        "filePath": "=C:\\Users\\arsha\\pharma-leads-pipeline\\exports\\pharma_leads_{{$now.format('YYYYMMDD')}}.xlsx"
+        "method": "GET",
+        "url": "http://localhost:5000/get-report-path",
+        "options": {}
       },
-      "id": "read-excel-001",
-      "name": "Read Excel File",
-      "type": "n8n-nodes-base.readBinaryFiles",
-      "typeVersion": 1,
+      "id": "http-get-001",
+      "name": "Get Report Path",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
       "position": [
         650,
         300
       ]
-    },
-    {
-      "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "to": "={{ $json.email }}",
-        "subject": "Daily Pharma Leads Report - {{$now.format('YYYY-MM-DD')}}",
-        "text": "Hello,\n\nYour daily pharmaceutical lead discovery report is ready.\n\nThis automated report contains:\n- Newly discovered pharma companies\n- Extracted contact information\n- Company enrichment details\n\nThe report was generated at {{$now.format('YYYY-MM-DD HH:mm:ss')}}.\n\nBest regards,\nPharma Leads Pipeline",
-        "html": "<html><body><h2>Daily Pharma Leads Report</h2><p>Your daily pharmaceutical lead discovery report is ready.</p><p><strong>Generated:</strong> {{$now.format('YYYY-MM-DD HH:mm:ss')}}</p><p>This report contains newly discovered pharma companies with contact information and enrichment details.</p><br><p>Best regards,<br><em>Pharma Leads Pipeline</em></p></body></html>",
-        "attachments": "={{ $binary.data }}",
-        "options": {}
-      },
-      "id": "send-gmail-001",
-      "name": "Send Gmail Report",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2,
-      "position": [
-        850,
-        300
-      ],
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "gmail-creds",
-          "name": "Gmail OAuth2"
-        }
-      }
     },
     {
       "parameters": {
@@ -87,41 +63,57 @@
           "conditions": [
             {
               "id": "check-exists",
-              "leftValue": "={{ $binary.data }}",
-              "rightValue": "",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "true",
               "operator": {
-                "type": "string",
-                "operation": "exists"
+                "type": "boolean",
+                "operation": "equals"
               }
             }
           ]
         }
       },
-      "id": "if-exists-001",
-      "name": "File Exists?",
+      "id": "if-001",
+      "name": "Report Exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        650,
-        500
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "filePath": "={{ $json.report_path }}"
+      },
+      "id": "read-001",
+      "name": "Read Excel File",
+      "type": "n8n-nodes-base.readBinaryFiles",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        200
       ]
     },
     {
       "parameters": {
         "resource": "message",
         "operation": "send",
-        "to": "={{ $json.email }}",
-        "subject": "Pharma Pipeline Alert - {{$now.format('YYYY-MM-DD')}}",
-        "text": "Hello,\n\nThe daily pharma lead pipeline ran but no Excel report was generated.\n\nThis could mean:\n- No new companies were discovered today\n- The pipeline encountered an error\n\nPlease check the pipeline logs for details.\n\nBest regards,\nPharma Leads Pipeline",
+        "to": "your-email@gmail.com",
+        "subject": "Daily Pharma Leads Report - {{$now.format('YYYY-MM-DD')}}",
+        "text": "Hello,\n\nYour daily pharmaceutical lead discovery report is ready.\n\nGenerated: {{$now.format('YYYY-MM-DD HH:mm:ss')}}\n\nBest regards,\nPharma Leads Pipeline",
+        "html": "<html><body><h2>Daily Pharma Leads Report</h2><p>Your report is attached.</p><p><strong>Generated:</strong> {{$now.format('YYYY-MM-DD HH:mm:ss')}}</p></body></html>",
+        "attachments": "={{ $binary.data }}",
         "options": {}
       },
-      "id": "send-alert-001",
-      "name": "Send Alert Email",
+      "id": "gmail-001",
+      "name": "Send Gmail Report",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2,
       "position": [
-        850,
-        500
+        1250,
+        200
       ],
       "credentials": {
         "gmailOAuth2": {
@@ -132,16 +124,27 @@
     },
     {
       "parameters": {
-        "jsCode": "// Prepare recipient email from environment or static\nreturn [{\n  json: {\n    email: process.env.RECIPIENT_EMAIL || 'your-email@example.com'\n  }\n}];"
+        "resource": "message",
+        "operation": "send",
+        "to": "your-email@gmail.com",
+        "subject": "Pharma Pipeline Alert - {{$now.format('YYYY-MM-DD')}}",
+        "text": "Hello,\n\nThe daily pharma lead pipeline ran but no report was generated.\n\nPlease check the pipeline logs.\n\nBest regards,\nPharma Leads Pipeline",
+        "options": {}
       },
-      "id": "set-recipient-001",
-      "name": "Set Recipient",
-      "type": "n8n-nodes-base.code",
+      "id": "alert-001",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.gmail",
       "typeVersion": 2,
       "position": [
-        450,
-        100
-      ]
+        1050,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gmail-creds",
+          "name": "Gmail OAuth2"
+        }
+      }
     }
   ],
   "connections": {
@@ -149,56 +152,40 @@
       "main": [
         [
           {
-            "node": "Set Recipient",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Run Pipeline Script",
+            "node": "Run Pipeline API",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Set Recipient": {
+    "Run Pipeline API": {
       "main": [
         [
           {
-            "node": "Run Pipeline Script",
+            "node": "Get Report Path",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Run Pipeline Script": {
+    "Get Report Path": {
+      "main": [
+        [
+          {
+            "node": "Report Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report Exists?": {
       "main": [
         [
           {
             "node": "Read Excel File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Read Excel File": {
-      "main": [
-        [
-          {
-            "node": "File Exists?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "File Exists?": {
-      "main": [
-        [
-          {
-            "node": "Send Gmail Report",
             "type": "main",
             "index": 0
           }
@@ -211,11 +198,21 @@
           }
         ]
       ]
+    },
+    "Read Excel File": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1",
-    "errorWorkflow": "",
     "timezone": "Asia/Kolkata",
     "saveExecutionProgress": true,
     "saveManualExecutions": true
