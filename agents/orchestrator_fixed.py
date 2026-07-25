@@ -10,6 +10,13 @@ from tools.enrichment_agent import enrich_company
 from tools.excel_exporter import export_to_excel
 
 
+def _call(tool_func, *args, **kwargs):
+    """Call a tool whether it's a plain function or LangChain @tool wrapper."""
+    if hasattr(tool_func, 'func'):
+        return tool_func.func(*args, **kwargs)
+    return tool_func(*args, **kwargs)
+
+
 def run_pipeline():
     """Run the full pipeline: Discover -> Enrich -> Extract Contacts -> Save -> Export."""
     print("=" * 70)
@@ -22,7 +29,7 @@ def run_pipeline():
 
     # Step 1: Discover companies
     print("[Step 1/5] Discovering companies...")
-    companies = discover_pharma_companies.func()
+    companies = _call(discover_pharma_companies)
 
     if not companies:
         print("[!] No companies found. Exiting.")
@@ -45,13 +52,13 @@ def run_pipeline():
 
         # Enrich
         print("  -> Enriching...")
-        enriched = enrich_company.func(name, website)
+        enriched = _call(enrich_company, name, website)
         enriched["discovered_date"] = __import__("datetime").datetime.now().isoformat()
         save_company(enriched)
 
         # Extract contacts
         print("  -> Extracting contacts...")
-        contacts = extract_contacts.func(name, website)
+        contacts = _call(extract_contacts, name, website)
 
         if contacts:
             for contact in contacts:
@@ -62,7 +69,7 @@ def run_pipeline():
 
     # Step 5: Export
     print("[Step 5/5] Generating Excel report...")
-    report_path = export_to_excel.func()
+    report_path = _call(export_to_excel)
 
     close_driver()
 
