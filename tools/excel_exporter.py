@@ -2,7 +2,6 @@
 import os
 import pandas as pd
 from datetime import datetime
-from langchain.tools import tool
 from database.neo4j_helpers import get_all_leads, get_companies_without_contacts, get_pipeline_stats, mark_export
 
 EXPORT_DIR = os.getenv("EXPORT_DIR", "./exports")
@@ -15,7 +14,6 @@ def _strip_tz(value):
     return value
 
 
-@tool
 def export_to_excel() -> str:
     """Export all leads to a dated Excel file. Returns the file path."""
     print("[Excel Exporter] Generating report...")
@@ -29,7 +27,6 @@ def export_to_excel() -> str:
     no_contact = get_companies_without_contacts()
     stats = get_pipeline_stats()
 
-    # Build contacts DataFrame
     contacts_rows = []
     for company in leads:
         base = {
@@ -61,7 +58,6 @@ def export_to_excel() -> str:
 
     df_contacts = pd.DataFrame(contacts_rows)
 
-    # Build "no contacts" DataFrame
     no_contact_rows = []
     for company in no_contact:
         no_contact_rows.append({
@@ -73,7 +69,6 @@ def export_to_excel() -> str:
         })
     df_no_contact = pd.DataFrame(no_contact_rows)
 
-    # Build summary
     df_summary = pd.DataFrame({
         "Metric": ["Total Companies", "Total Contacts", "Companies Added Today", "Companies Without Contacts", "Report Generated"],
         "Value": [
@@ -90,7 +85,6 @@ def export_to_excel() -> str:
         df_no_contact.to_excel(writer, sheet_name="Companies No Contacts", index=False)
         df_summary.to_excel(writer, sheet_name="Summary", index=False)
 
-        # Auto-resize columns
         for sheet_name in writer.sheets:
             ws = writer.sheets[sheet_name]
             for col in ws.columns:

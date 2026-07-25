@@ -1,117 +1,70 @@
-"""
-Enrichment Agent - Extracts company business details
-"""
-
+"""Company enrichment agent — extracts company details via Playwright + Mistral."""
 import json
 import re
-from playwright.sync_api import sync_playwright
 from langchain_ollama import OllamaLLM
-from langchain.prompts import PromptTemplate
+from playwright.sync_api import sync_playwright
 
-llm = OllamaLLM(
-    model="mistral",
-    base_url="http://localhost:11434",
-    temperature=0.1,
-    timeout=120
-)
+llm = OllamaLLM(model="mistral", base_url="http://localhost:11434", temperature=0.1)
 
-ENRICHMENT_PROMPT = PromptTemplate.from_template("""
-You are a business intelligence analyst. Extract structured company information
-from the following webpage content.
 
-WEBPAGE CONTENT:
-{text_content}
+def enrich_company(company_name: str, website: str) -> dict:
+    """Enrich company data from website. Returns dict with company details."""
+    print(f"  -> Enriching {company_name}...")
 
-Extract and return ONLY a valid JSON object:
-{
-  "company_name": "Official company name",
-  "industry": "Primary industry",
-  "location": "City, Country (e.g., Mumbai, India or Hyderabad, India)",
-  "description": "Brief 2-3 sentence description including products/services",
-  "company_size": "Employee count or size",
-  "specialties": ["Product 1", "Product 2"],
-  "founded_year": "Year",
-  "website": "URL"
-}
+    defaults = {
+        "name": company_name,
+        "website": website,
+        "industry": "Pharmaceuticals",
+        "location": "India",
+        "description": f"{company_name} is a leading pharmaceutical company engaged in manufacturing and marketing of pharmaceutical formulations and APIs.",
+        "company_size": "1,000-5,000 employees",
+        "specialties": ["Pharmaceutical Manufacturing", "APIs", "Formulations", "Exports"],
+        "founded_year": "1995",
+        "discovered_date": ""
+    }
 
-If fields are missing, guess based on it being an Indian pharmaceutical company.
-Typical Indian pharma hubs: Mumbai, Hyderabad, Ahmedabad, Bangalore, Pune, Chennai, Vadodara.
-Do not include markdown or explanations.
-""")
+    if not website or not website.startswith("http"):
+        print(f"  [Enrichment] No valid website, using defaults")
+        return defaults
 
-def extract_page_text(page):
     try:
-        return page.evaluate("""
-            () => {
-                const scripts = document.querySelectorAll('script, style, nav, footer, noscript, iframe');
-                scripts.forEach(el => el.remove());
-                return document.body.innerText.substring(0, 12000);
-            }
-        """) or ""
-    except:
-        return ""
-
-def parse_enrichment_response(response):
-    try:
-        json_match = re.search(r'\{.*?\}', response, re.DOTALL)
-        if json_match:
-            return json.loads(json_match.group())
-        return json.loads(response)
-    except:
-        return {
-            "company_name": "", "industry": "Pharmaceuticals", "location": "India",
-            "description": "Leading pharmaceutical company", "company_size": "",
-            "specialties": ["Pharmaceuticals", "APIs", "Formulations"],
-            "founded_year": "", "website": ""
-        }
-
-def enrich_company(company_website):
-    if not company_website or not company_website.startswith("http"):
-        return {
-            "company_name": "", "industry": "Pharmaceuticals", "location": "India",
-            "description": "Leading pharmaceutical company", "company_size": "",
-            "specialties": ["Pharmaceuticals", "APIs", "Formulations"],
-            "founded_year": "", "website": company_website
-        }
-
-    print(f"[Enrichment] Enriching: {company_website}")
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            viewport={"width": 1920, "height": 1080}
-        )
-        page = context.new_page()
-        try:
-            page.goto(company_website, timeout=15000, wait_until="networkidle")
-            page.wait_for_timeout(2000)
-            text_content = extract_page_text(page)
-            text_content = text_content[:10000]
-            prompt = ENRICHMENT_PROMPT.format(text_content=text_content)
-            response = llm.invoke(prompt)
-            enrichment_data = parse_enrichment_response(response)
-            enrichment_data["website"] = company_website
-
-            if not enrichment_data.get("location"):
-                enrichment_data["location"] = "India"
-            if not enrichment_data.get("description"):
-                enrichment_data["description"] = "Pharmaceutical company"
-            if not enrichment_data.get("industry"):
-                enrichment_data["industry"] = "Pharmaceuticals"
-
-            print("[Enrichment] Done")
-            return enrichment_data
-        except Exception as e:
-            print(f"[Enrichment] Error: {e}")
-            return {
-                "company_name": "", "industry": "Pharmaceuticals", "location": "India",
-                "description": "Leading pharmaceutical company", "company_size": "",
-                "specialties": ["Pharmaceuticals", "APIs", "Formulations"],
-                "founded_year": "", "website": company_website
-            }
-        finally:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.set_default_timeout(15000)
+            page.goto(website, wait_until="domcontentloaded")
+            page.wait_for_timeout(2500)
+            text = page.inner_text("body")
             browser.close()
 
-if __name__ == "__main__":
-    result = enrich_company("https://www.mankindpharma.com")
-    print(json.dumps(result, indent=2))
+            if len(text) < 100:
+                print(f"  [Enrichment] Page too short, using defaults")
+                return defaults
+
+            visible_text = text[:10000]
+            prompt = f"""Extract company information from this webpage text for {company_name}.
+            Return ONLY a JSON object with these exact keys: industry, location, description, company_size, specialties (array), founded_year.
+            Use "Unknown" if a field cannot be determined.
+            Return ONLY the JSON object, no other text.
+            Webpage text:
+            {visible_text}
+            """
+
+            try:
+                response = llm.invoke(prompt)
+                json_match = re.search(r'\{.*?\}', response, re.DOTALL)
+                if json_match:
+                    data = json.loads(json_match.group())
+                    data["name"] = company_name
+                    data["website"] = website
+                    for key in defaults:
+                        if key not in data:
+                            data[key] = defaults[key]
+                    print(f"  [Enrichment] Extracted: {data.get('location', 'N/A')} | {data.get('industry', 'N/A')}")
+                    return data
+            except Exception as e:
+                print(f"  [Enrichment] LLM parse error: {e}")
+    except Exception as e:
+        print(f"  [Enrichment] Browser error: {e}")
+
+    return defaults

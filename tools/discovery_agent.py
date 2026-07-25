@@ -5,10 +5,8 @@ import random
 import time
 import feedparser
 from bs4 import BeautifulSoup
-from langchain.tools import tool
 from database.neo4j_helpers import is_company_processed, mark_company_processed
 
-# 100+ REAL Indian pharma companies with verified websites
 INDIAN_PHARMA_POOL = [
     {"name": "Sun Pharmaceutical Industries", "website": "https://www.sunpharma.com"},
     {"name": "Dr. Reddy's Laboratories", "website": "https://www.drreddys.com"},
@@ -92,7 +90,6 @@ INDIAN_PHARMA_POOL = [
     {"name": "Jagsonpal Pharmaceuticals", "website": "https://www.jagsonpal.com"},
 ]
 
-# Words that indicate a name is NOT a real company
 STOP_WORDS = [
     'fierce', 'closing', 'making', 'get', 'latest', 'top', 'best', 'list',
     'article', 'news', 'report', 'analysis', 'review', 'update', 'trend',
@@ -102,7 +99,6 @@ STOP_WORDS = [
     'petrochem', 'steel', 'marbles', 'grant thornton'
 ]
 
-# Generic names that aren't specific companies
 GENERIC_NAMES = [
     'pharma', 'pharmaceuticals', 'biotech', 'healthcare', 'laboratories',
     'drugs', 'medicare', 'remedies', 'chemicals', 'diagnostics'
@@ -116,46 +112,31 @@ HEADERS = {
 
 
 def _is_valid_company_name(name: str) -> bool:
-    """Strict validation to filter out article fragments and garbage."""
     name_lower = name.lower()
-
-    # Too short or too long
     if len(name) < 6 or len(name) > 80:
         return False
-
-    # Contains stop words
     for stop in STOP_WORDS:
         if stop in name_lower:
             return False
-
-    # Is just a generic word (not a specific company)
     stripped = name_lower.replace("limited", "").replace("ltd", "").replace("pharma", "").replace("pharmaceuticals", "").strip()
     if stripped in GENERIC_NAMES or len(stripped) < 3:
         return False
-
-    # Must contain at least one word that looks like a proper noun (capitalized)
     words = name.split()
     proper_nouns = [w for w in words if w[0].isupper() and len(w) > 1]
     if len(proper_nouns) < 2:
         return False
-
-    # Should end with a company suffix
-    suffixes = ['pharma', 'pharmaceuticals', 'labs', 'laboratories', 'limited', 'ltd', 
-                'healthcare', 'biotech', 'biosciences', 'life sciences', 'medicare', 
+    suffixes = ['pharma', 'pharmaceuticals', 'labs', 'laboratories', 'limited', 'ltd',
+                'healthcare', 'biotech', 'biosciences', 'life sciences', 'medicare',
                 'remedies', 'drugs', 'enterprises', 'industries', 'chemicals', 'diagnostics']
     has_suffix = any(name_lower.endswith(s) for s in suffixes)
     if not has_suffix and ' ' not in name:
         return False
-
     return True
 
 
 def _extract_company_names_from_text(text: str) -> list:
-    """Extract likely company names from raw text."""
-    # Look for capitalized phrases ending with pharma/healthcare suffixes
     pattern = r'([A-Z][A-Za-z0-9\s&\'.,]+?(?:Pharma(?:ceuticals?)?|Labs?|Laboratories|Limited|Ltd|Healthcare|Biotech|Biosciences|Life Sciences|Medicare|Remedies|Drugs|Enterprises|Industries|Chemicals|Diagnostics))'
     matches = re.findall(pattern, text)
-
     companies = []
     seen = set()
     for m in matches:
@@ -209,12 +190,10 @@ def _scrape_google_news() -> list:
         return []
 
 
-@tool
 def discover_pharma_companies() -> list:
     """Discover new pharma companies. Returns up to 10 companies with valid websites."""
     print("[Discovery] Starting pharma company discovery...")
 
-    # Try web scraping
     all_found = []
     print("[Discovery] Scraping FiercePharma RSS...")
     all_found.extend(_scrape_fiercepharma())
@@ -227,7 +206,6 @@ def discover_pharma_companies() -> list:
     print("[Discovery] Scraping Google News...")
     all_found.extend(_scrape_google_news())
 
-    # Filter out already processed
     unique_scraped = []
     seen = set()
     for c in all_found:
@@ -237,18 +215,13 @@ def discover_pharma_companies() -> list:
 
     print(f"[Discovery] Found {len(unique_scraped)} valid companies from web scraping")
 
-    # ALWAYS supplement from verified pool to ensure we get companies WITH websites
-    # Web scraping finds names but rarely websites, so the pool is essential
     print("[Discovery] Loading verified pharma companies with websites...")
-
     random.shuffle(INDIAN_PHARMA_POOL)
 
-    # First, add any good scraped companies (they'll get skipped later if no website)
-    result = unique_scraped[:3]  # Max 3 scraped ones
+    result = unique_scraped[:3]
     for c in result:
         mark_company_processed(c["name"], "web_scrape")
 
-    # Fill the rest from verified pool
     needed = 10 - len(result)
     for company in INDIAN_PHARMA_POOL:
         if needed <= 0:
@@ -259,7 +232,6 @@ def discover_pharma_companies() -> list:
             seen.add(company["name"])
             needed -= 1
 
-    # Filter: ONLY return companies with valid websites
     result_with_websites = [c for c in result if c.get("website") and c["website"].startswith("http")]
 
     print(f"[Discovery] Returning {len(result_with_websites)} companies with valid websites")
