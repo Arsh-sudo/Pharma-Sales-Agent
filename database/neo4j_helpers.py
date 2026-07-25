@@ -1,135 +1,123 @@
-"""
-Neo4j Database Helper Functions
-"""
-
+"""Neo4j database helpers."""
 import os
 from neo4j import GraphDatabase
-from dotenv import load_dotenv
-
-load_dotenv()
 
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "pharma-leads-2024")
 
-driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+def get_driver():
+    return GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 
 def setup_schema():
+    driver = get_driver()
     with driver.session() as session:
         session.run("CREATE CONSTRAINT company_name IF NOT EXISTS FOR (c:Company) REQUIRE c.name IS UNIQUE")
-        session.run("CREATE CONSTRAINT person_name_company IF NOT EXISTS FOR (p:Person) REQUIRE (p.name, p.company) IS UNIQUE")
-        session.run("CREATE INDEX company_industry IF NOT EXISTS FOR (c:Company) ON (c.industry)")
-        session.run("CREATE INDEX person_email IF NOT EXISTS FOR (p:Person) ON (p.email)")
-        session.run("CREATE INDEX company_source IF NOT EXISTS FOR (c:Company) ON (c.source)")
+        session.run("CREATE CONSTRAINT contact_email IF NOT EXISTS FOR (p:Person) REQUIRE p.email IS UNIQUE")
+        session.run("CREATE INDEX company_website IF NOT EXISTS FOR (c:Company) ON (c.website)")
+    driver.close()
     print("[Neo4j] Schema setup complete")
 
-def save_company(company_data):
-    query = """
-    MERGE (c:Company {name: $name})
-    SET c.website = COALESCE($website, c.website, ""),
-        c.industry = COALESCE($industry, c.industry, "Pharmaceuticals"),
-        c.location = COALESCE($location, c.location, "India"),
-        c.description = COALESCE($description, c.description, "Pharmaceutical company"),
-        c.company_size = COALESCE($company_size, c.company_size, ""),
-        c.specialties = COALESCE($specialties, c.specialties, []),
-        c.founded_year = COALESCE($founded_year, c.founded_year, ""),
-        c.source = COALESCE($source, c.source, ""),
-        c.updated_at = datetime(),
-        c.discovered_date = COALESCE(c.discovered_date, datetime())
-    RETURN c.name AS company_name
-    """
-    try:
-        with driver.session() as session:
-            result = session.run(query, **company_data)
-            record = result.single()
-            if record:
-                print(f"[Neo4j] Saved company: {record['company_name']}")
-                return True
-    except Exception as e:
-        print(f"[Neo4j Error] save_company: {e}")
-    return False
+def save_company(company_data: dict):
+    driver = get_driver()
+    with driver.session() as session:
+        session.run("""
+            MERGE (c:Company {name: $name})
+            SET c.website = $website,
+                c.industry = $industry,
+                c.location = $location,
+                c.description = $description,
+                c.company_size = $company_size,
+                c.specialties = $specialties,
+                c.founded_year = $founded_year,
+                c.discovered_date = datetime()
+        """, company_data)
+    driver.close()
 
-def save_contact(contact_data, company_name):
-    query = """
-    MATCH (c:Company {name: $company_name})
-    MERGE (p:Person {name: $name, company: $company_name})
-    SET p.title = COALESCE($title, p.title, ""),
-        p.email = COALESCE($email, p.email, ""),
-        p.department = COALESCE($department, p.department, ""),
-        p.updated_at = datetime()
-    MERGE (p)-[:WORKS_AT]->(c)
-    RETURN p.name AS contact_name
-    """
-    try:
-        with driver.session() as session:
-            result = session.run(
-                query,
-                company_name=company_name,
-                name=contact_data.get("name", ""),
-                title=contact_data.get("title", ""),
-                email=contact_data.get("email", ""),
-                department=contact_data.get("department", "")
-            )
-            record = result.single()
-            if record:
-                print(f"[Neo4j] Saved contact: {record['contact_name']} @ {company_name}")
-                return True
-    except Exception as e:
-        print(f"[Neo4j Error] save_contact: {e}")
-    return False
+def save_contact(contact_data: dict, company_name: str):
+    driver = get_driver()
+    with driver.session() as session:
+        session.run("""
+            MATCH (c:Company {name: $company_name})
+            MERGE (p:Person {email: $email})
+            SET p.name = $name,
+                p.title = $title,
+                p.department = $department
+            MERGE (p)-[:WORKS_AT]->(c)
+        """, {"company_name": company_name, **contact_data})
+    driver.close()
 
 def get_all_leads():
-    query = """
-    MATCH (p:Person)-[:WORKS_AT]->(c:Company)
-    RETURN c.name AS Company, c.website AS Website, c.industry AS Industry,
-           c.location AS Location, c.description AS Description,
-           p.name AS Contact, p.title AS Title, p.email AS Email,
-           p.department AS Department, c.discovered_date AS DiscoveredDate
-    ORDER BY c.name, p.name
-    """
+    driver = get_driver()
     with driver.session() as session:
-        result = session.run(query)
-        return [record.data() for record in result]
+        result = session.run("""
+            MATCH (c:Company)
+            OPTIONAL MATCH (p:Person)-[:WORKS_AT]->(c)
+            RETURN c, collect(p) as contacts
+            ORDER BY c.discovered_date DESC
+        """)
+        leads = []
+        for record in result:
+            company = dict(record["c"])
+            company["contacts"] = [dict(p) for p in record["contacts"]]
+            leads.append(company)
+    driver.close()
+    return leads
 
 def get_companies_without_contacts():
-    query = """
-    MATCH (c:Company)
-    WHERE NOT (c)<-[:WORKS_AT]-(:Person)
-    RETURN c.name AS Company, c.website AS Website, c.industry AS Industry,
-           c.location AS Location, c.description AS Description
-    """
+    driver = get_driver()
     with driver.session() as session:
-        result = session.run(query)
-        return [record.data() for record in result]
-
-def mark_export_date():
-    query = """
-    MERGE (d:DailyExport {date: date()})
-    SET d.exported_at = datetime()
-    RETURN d.date AS export_date
-    """
-    with driver.session() as session:
-        result = session.run(query)
-        return result.single()["export_date"]
+        result = session.run("""
+            MATCH (c:Company)
+            WHERE NOT (c)<-[:WORKS_AT]-(:Person)
+            RETURN c
+        """)
+        companies = [dict(record["c"]) for record in result]
+    driver.close()
+    return companies
 
 def get_pipeline_stats():
-    queries = {
-        "total_companies": "MATCH (c:Company) RETURN count(c) AS count",
-        "total_contacts": "MATCH (p:Person) RETURN count(p) AS count",
-        "companies_today": "MATCH (c:Company) WHERE c.discovered_date >= date() RETURN count(c) AS count",
-        "contacts_today": "MATCH (p:Person) WHERE p.updated_at >= datetime() - duration('P1D') RETURN count(p) AS count"
-    }
-    stats = {}
+    driver = get_driver()
     with driver.session() as session:
-        for key, query in queries.items():
-            result = session.run(query)
-            stats[key] = result.single()["count"]
-    return stats
-
-def close_driver():
+        total_companies = session.run("MATCH (c:Company) RETURN count(c) as total").single()["total"]
+        total_contacts = session.run("MATCH (p:Person) RETURN count(p) as total").single()["total"]
+        today_companies = session.run("""
+            MATCH (c:Company)
+            WHERE c.discovered_date >= datetime({epochSeconds: timestamp() / 1000 * 1000 - 86400})
+            RETURN count(c) as total
+        """).single()["total"]
     driver.close()
-    print("[Neo4j] Driver closed")
+    return {
+        "total_companies": total_companies,
+        "total_contacts": total_contacts,
+        "today_companies": today_companies
+    }
 
-if __name__ == "__main__":
-    setup_schema()
-    print("Stats:", get_pipeline_stats())
+def mark_export(filename: str, companies_count: int, contacts_count: int):
+    driver = get_driver()
+    with driver.session() as session:
+        session.run("""
+            CREATE (e:Export {filename: $filename, companies_count: $companies_count, contacts_count: $contacts_count, exported_at: datetime()})
+        """, {"filename": filename, "companies_count": companies_count, "contacts_count": contacts_count})
+    driver.close()
+
+# NEW: Functions needed by discovery_agent.py
+def is_company_processed(name: str) -> bool:
+    """Check if a company has already been processed (exists in Neo4j)."""
+    driver = get_driver()
+    with driver.session() as session:
+        result = session.run("MATCH (c:Company {name: $name}) RETURN count(c) as count", {"name": name})
+        count = result.single()["count"]
+    driver.close()
+    return count > 0
+
+def mark_company_processed(name: str, source: str = "pipeline"):
+    """Mark a company as processed by creating a placeholder Company node."""
+    driver = get_driver()
+    with driver.session() as session:
+        session.run("""
+            MERGE (c:Company {name: $name})
+            SET c.source = $source,
+                c.discovered_date = datetime()
+        """, {"name": name, "source": source})
+    driver.close()
