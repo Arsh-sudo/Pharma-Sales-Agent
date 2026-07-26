@@ -2,7 +2,7 @@
 
 > **AI-powered autonomous pipeline that discovers pharmaceutical companies, extracts contacts, and delivers daily Excel reports via email.**
 
-Built entirely with AI — from architecture to code to deployment. This was a client challenge to create a fully autonomous lead generation system for the pharmaceutical industry.
+Built entirely from architecture to code to deployment. This was a client challenge to create a fully autonomous lead generation system for the pharmaceutical industry.
 
 ---
 
@@ -249,14 +249,4 @@ Click **Execute workflow** in n8n editor to run manually.
 
 ---
 
-## 📝 License
 
-MIT License — built for a client challenge.
-
-## 🙏 Acknowledgments
-
-Built entirely with AI assistance (Kimi, Claude) as a proof-of-concept for autonomous lead generation pipelines.
-
----
-
-> **"From zero to fully autonomous pipeline — built by AI, for humans."**
