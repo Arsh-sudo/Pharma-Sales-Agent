@@ -1,4 +1,4 @@
-# 🏥 Pharma Lead Discovery Pipeline
+# 🏥 ScoutFlow
 
 > **AI-powered autonomous pipeline that discovers pharmaceutical companies, extracts contacts, and delivers daily Excel reports via email.**
 
